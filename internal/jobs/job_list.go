@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"encoding/json"
+	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -14,6 +15,24 @@ func K8sJobList() []Job {
 			OutputFile: "/list/pods.json",
 			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
 				pods, _ := c.CoreV1().Pods("").List(ctx, v1.ListOptions{})
+				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
+				return jsonPods
+			},
+		},
+		{
+			Name:       "configmap-list",
+			OutputFile: "/list/configmaps.json",
+			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
+				pods, _ := c.CoreV1().ConfigMaps("").List(ctx, v1.ListOptions{})
+				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
+				return jsonPods
+			},
+		},
+		{
+			Name:       "service-list",
+			OutputFile: "/list/services.json",
+			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
+				pods, _ := c.CoreV1().ConfigMaps("").List(ctx, v1.ListOptions{})
 				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
 				return jsonPods
 			},
@@ -34,6 +53,21 @@ func K8sJobList() []Job {
 				leases, _ := c.CoordinationV1().Leases("").List(ctx, v1.ListOptions{})
 				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
 				return jsonLeases
+			},
+		},
+	}
+	return jobList
+}
+
+func K8sCustomJobList() []CustomJob {
+	jobList := []CustomJob{
+		{
+			Name:       "crd-list",
+			OutputFile: "/list/crd.json",
+			RetrieveFunction: func(c *crdClient.Clientset, ctx context.Context) []byte {
+				crds, _ := c.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
+				jsonCrds, _ := json.MarshalIndent(crds, "", "  ")
+				return jsonCrds
 			},
 		},
 	}
