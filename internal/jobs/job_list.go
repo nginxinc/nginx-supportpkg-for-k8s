@@ -38,6 +38,24 @@ func K8sJobList() []Job {
 			},
 		},
 		{
+			Name:       "deployment-list",
+			OutputFile: "/list/deployments.json",
+			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
+				leases, _ := c.AppsV1().Deployments("").List(ctx, v1.ListOptions{})
+				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
+				return jsonLeases
+			},
+		},
+		{
+			Name:       "statefulset-list",
+			OutputFile: "/list/StatefulSets.json",
+			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
+				leases, _ := c.AppsV1().StatefulSets("").List(ctx, v1.ListOptions{})
+				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
+				return jsonLeases
+			},
+		},
+		{
 			Name:       "server-version",
 			OutputFile: "/k8s/server_version.json",
 			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
