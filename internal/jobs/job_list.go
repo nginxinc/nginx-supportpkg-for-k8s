@@ -32,7 +32,7 @@ func K8sJobList() []Job {
 			Name:       "service-list",
 			OutputFile: "/list/services.json",
 			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				pods, _ := c.CoreV1().ConfigMaps("").List(ctx, v1.ListOptions{})
+				pods, _ := c.CoreV1().Services("").List(ctx, v1.ListOptions{})
 				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
 				return jsonPods
 			},
