@@ -6,6 +6,7 @@ import (
 	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 func K8sJobList() []Job {
@@ -86,6 +87,30 @@ func K8sCustomJobList() []CustomJob {
 				crds, _ := c.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
 				jsonCrds, _ := json.MarshalIndent(crds, "", "  ")
 				return jsonCrds
+			},
+		},
+	}
+	return jobList
+}
+
+func K8sMetricsJobList() []MetricsJob {
+	jobList := []MetricsJob{
+		{
+			Name:       "pod-resource-list",
+			OutputFile: "/list/pod_resource_list.json",
+			RetrieveFunction: func(c *metricsClient.Clientset, ctx context.Context) []byte {
+				podMetrics, _ := c.MetricsV1beta1().PodMetricses("").List(ctx, v1.ListOptions{})
+				jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
+				return jsonPodMetrics
+			},
+		},
+		{
+			Name:       "node-resource-list",
+			OutputFile: "/list/node_resource_list.json",
+			RetrieveFunction: func(c *metricsClient.Clientset, ctx context.Context) []byte {
+				podMetrics, _ := c.MetricsV1beta1().NodeMetricses().List(ctx, v1.ListOptions{})
+				jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
+				return jsonPodMetrics
 			},
 		},
 	}

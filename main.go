@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
 	"os"
 	"path/filepath"
 )
@@ -42,5 +43,11 @@ func main() {
 	for _, job := range jobs.K8sCustomJobList() {
 		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
 		job.CustomCollect(tmpDir, crdClientset)
+	}
+
+	metricsClientset, err := metricsClient.NewForConfig(config)
+	for _, job := range jobs.K8sMetricsJobList() {
+		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
+		job.MetricsCollect(tmpDir, metricsClientset)
 	}
 }
