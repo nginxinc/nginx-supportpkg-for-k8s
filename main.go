@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	helmClient "github.com/mittwald/go-helm-client"
 	"github.com/nginxinc/kubectl-kic-supportpkg/internal/jobs"
 	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
@@ -49,5 +50,17 @@ func main() {
 	for _, job := range jobs.K8sMetricsJobList() {
 		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
 		job.MetricsCollect(tmpDir, metricsClientset)
+
+		// Create a Helm client
+		opts := &helmClient.RestConfClientOptions{
+			Options:    &helmClient.Options{},
+			RestConfig: config,
+		}
+		hc, _ := helmClient.NewClientFromRestConf(opts)
+		for _, job := range jobs.HelmJobList() {
+			fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
+			job.Collect(tmpDir, hc)
+
+		}
 	}
 }
