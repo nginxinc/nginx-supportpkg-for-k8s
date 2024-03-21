@@ -2,52 +2,32 @@ package main
 
 import (
 	"fmt"
+	"github.com/nginxinc/kubectl-kic-supportpkg/internal/data_collector"
 	"github.com/nginxinc/kubectl-kic-supportpkg/internal/jobs"
-	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
-	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
-	"os"
 	"path/filepath"
 )
 
 func main() {
 
-	tmpDir, err := os.MkdirTemp("", "kic-diag")
-	//defer os.RemoveAll(tmpDir)
-
 	home := homedir.HomeDir()
-	kubeconfig := filepath.Join(home, ".kube", "config")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	kubeConfig := filepath.Join(home, ".kube", "config")
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
+
+	namespaces := []string{"nginx-ingress-0", "observability"}
+
+	collector := data_collector.NewDataCollector(config, namespaces...)
+
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// Create Kubernetes clientSet
-	clientSet, _ := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
+	for _, job := range jobs.JobList() {
+		fmt.Printf("Running %s and collecting the output in %s...\n", job.Name, collector.BaseDir)
+		job.Collect(collector)
 	}
 
-	for _, job := range jobs.K8sJobList() {
-		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
-		job.Collect(tmpDir, clientSet)
-	}
+	//collector.WrapUp()
 
-	// Create a new clientset for CRDs
-	crdClientset, err := crdClient.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-	for _, job := range jobs.K8sCustomJobList() {
-		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
-		job.CustomCollect(tmpDir, crdClientset)
-	}
-
-	metricsClientset, err := metricsClient.NewForConfig(config)
-	for _, job := range jobs.K8sMetricsJobList() {
-		fmt.Printf("Running %s and collecting the output in %s/%s...\n", job.Name, tmpDir, job.OutputFile)
-		job.MetricsCollect(tmpDir, metricsClientset)
-	}
 }

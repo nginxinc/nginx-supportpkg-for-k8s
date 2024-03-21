@@ -1,116 +1,201 @@
 package jobs
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
+	"github.com/nginxinc/kubectl-kic-supportpkg/internal/data_collector"
+	"io"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"log"
+	"path"
 )
 
-func K8sJobList() []Job {
+func JobList() []Job {
 	jobList := []Job{
 		{
-			Name:       "pod-list",
-			OutputFile: "/list/pods.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				pods, _ := c.CoreV1().Pods("").List(ctx, v1.ListOptions{})
-				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
-				return jsonPods
-			},
-		},
-		{
-			Name:       "configmap-list",
-			OutputFile: "/list/configmaps.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				pods, _ := c.CoreV1().ConfigMaps("").List(ctx, v1.ListOptions{})
-				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
-				return jsonPods
-			},
-		},
-		{
-			Name:       "service-list",
-			OutputFile: "/list/services.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				pods, _ := c.CoreV1().Services("").List(ctx, v1.ListOptions{})
-				jsonPods, _ := json.MarshalIndent(pods, "", "  ")
-				return jsonPods
-			},
-		},
-		{
-			Name:       "deployment-list",
-			OutputFile: "/list/deployments.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				leases, _ := c.AppsV1().Deployments("").List(ctx, v1.ListOptions{})
-				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
-				return jsonLeases
-			},
-		},
-		{
-			Name:       "statefulset-list",
-			OutputFile: "/list/StatefulSets.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				leases, _ := c.AppsV1().StatefulSets("").List(ctx, v1.ListOptions{})
-				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
-				return jsonLeases
-			},
-		},
-		{
-			Name:       "server-version",
-			OutputFile: "/k8s/server_version.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				serverVersion, _ := c.ServerVersion()
-				jsonServerVersion, _ := json.MarshalIndent(serverVersion, "", "  ")
-				return jsonServerVersion
-			},
-		},
-		{
-			Name:       "lease-list",
-			OutputFile: "/list/leases.json",
-			RetrieveFunction: func(c *kubernetes.Clientset, ctx context.Context) []byte {
-				leases, _ := c.CoordinationV1().Leases("").List(ctx, v1.ListOptions{})
-				jsonLeases, _ := json.MarshalIndent(leases, "", "  ")
-				return jsonLeases
-			},
-		},
-	}
-	return jobList
-}
+			Name:   "pod-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "pods.json")] = jsonResult
+				}
 
-func K8sCustomJobList() []CustomJob {
-	jobList := []CustomJob{
-		{
-			Name:       "crd-list",
-			OutputFile: "/list/crd.json",
-			RetrieveFunction: func(c *crdClient.Clientset, ctx context.Context) []byte {
-				crds, _ := c.ApiextensionsV1().CustomResourceDefinitions().List(ctx, v1.ListOptions{})
-				jsonCrds, _ := json.MarshalIndent(crds, "", "  ")
-				return jsonCrds
+				return jobResults
 			},
 		},
-	}
-	return jobList
-}
+		{
+			Name:   "collect-pods-logs",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				results := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					pods, _ := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{FieldSelector: "name"})
+					for _, pod := range pods.Items {
+						logFileName := path.Join(dc.BaseDir, namespace, "logs", pod.Name+".txt")
+						bufferedLogs := dc.K8sCoreClientSet.CoreV1().Pods(namespace).GetLogs(pod.Name, &corev1.PodLogOptions{})
+						podLogs, err := bufferedLogs.Stream(context.TODO())
+						if err != nil {
+							log.Fatal("error in opening stream")
+						}
+						buf := new(bytes.Buffer)
+						_, _ = io.Copy(buf, podLogs)
+						podLogs.Close()
+						results[logFileName] = buf.Bytes()
+					}
+				}
+				return results
+			},
+		},
+		{
+			Name:   "configmap-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.CoreV1().ConfigMaps(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "configmaps.json")] = jsonResult
+				}
 
-func K8sMetricsJobList() []MetricsJob {
-	jobList := []MetricsJob{
-		{
-			Name:       "pod-resource-list",
-			OutputFile: "/list/pod_resource_list.json",
-			RetrieveFunction: func(c *metricsClient.Clientset, ctx context.Context) []byte {
-				podMetrics, _ := c.MetricsV1beta1().PodMetricses("").List(ctx, v1.ListOptions{})
-				jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
-				return jsonPodMetrics
+				return jobResults
 			},
 		},
 		{
-			Name:       "node-resource-list",
-			OutputFile: "/list/node_resource_list.json",
-			RetrieveFunction: func(c *metricsClient.Clientset, ctx context.Context) []byte {
-				podMetrics, _ := c.MetricsV1beta1().NodeMetricses().List(ctx, v1.ListOptions{})
-				jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
-				return jsonPodMetrics
+			Name:   "service-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.CoreV1().Services(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "services.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
+			Name:   "deployment-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.AppsV1().Deployments(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "deployments.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
+			Name:   "statefulset-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.AppsV1().StatefulSets(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "statefulsets.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
+			Name:   "replicaset-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.AppsV1().ReplicaSets(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "replicasets.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
+			Name:   "lease-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.CoordinationV1().Leases(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "leases.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
+			Name:   "k8s-version",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				result, _ := dc.K8sCoreClientSet.ServerVersion()
+				jsonResult, _ := json.MarshalIndent(result, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "k8s", "version.json")] = jsonResult
+				return jobResults
+			},
+		},
+		{
+			Name:   "crd-info",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				result, _ := dc.K8sCrdClientSet.ApiextensionsV1().CustomResourceDefinitions().List(ctx, metav1.ListOptions{})
+				jsonResult, _ := json.MarshalIndent(result, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "k8s", "crd.json")] = jsonResult
+				return jobResults
+			},
+		},
+		{
+			Name:   "nodes-info",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				result, _ := dc.K8sCoreClientSet.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+				jsonResult, _ := json.MarshalIndent(result, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "k8s", "nodes.json")] = jsonResult
+				return jobResults
+			},
+		},
+		{
+			Name:   "metrics-information",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				nodeMetrics, _ := dc.K8sMetricsClientSet.MetricsV1beta1().NodeMetricses().List(ctx, metav1.ListOptions{})
+				jsonNodeMetrics, _ := json.MarshalIndent(nodeMetrics, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "metrics", "node-resource-list.json")] = jsonNodeMetrics
+				for _, namespace := range dc.Namespaces {
+					podMetrics, _ := dc.K8sMetricsClientSet.MetricsV1beta1().PodMetricses(namespace).List(ctx, metav1.ListOptions{})
+					jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
+					jobResults[path.Join(dc.BaseDir, "metrics", namespace, "pod-resource-list.json")] = jsonPodMetrics
+				}
+				return jobResults
+			},
+		},
+		{
+			Name:   "helm-information",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				settings := dc.K8sHelmClientSet.GetSettings()
+				jsonSettings, _ := json.MarshalIndent(settings, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "helm", "settings.json")] = jsonSettings
+				releases, _ := dc.K8sHelmClientSet.ListDeployedReleases()
+				jsonReleases, _ := json.MarshalIndent(releases, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "helm", "releases.json")] = jsonReleases
+				return jobResults
 			},
 		},
 	}
