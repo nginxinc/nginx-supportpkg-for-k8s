@@ -2,67 +2,28 @@ package jobs
 
 import (
 	"context"
-	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	"k8s.io/client-go/kubernetes"
-	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
+	"github.com/nginxinc/kubectl-kic-supportpkg/internal/data_collector"
 	"os"
 	"path"
 	"time"
 )
 
 type Job struct {
-	Name             string
-	OutputFile       string
-	RetrieveFunction func(*kubernetes.Clientset, context.Context) []byte
+	Name    string
+	Global  bool
+	Execute func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte
 }
 
-type CustomJob struct {
-	Name             string
-	OutputFile       string
-	RetrieveFunction func(*crdClient.Clientset, context.Context) []byte
-}
-
-type MetricsJob struct {
-	Name             string
-	OutputFile       string
-	RetrieveFunction func(*metricsClient.Clientset, context.Context) []byte
-}
-
-func (j Job) Collect(baseFolder string, cs *kubernetes.Clientset) {
+func (j Job) Collect(dc *data_collector.DataCollector) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	result := j.RetrieveFunction(cs, ctx)
 
-	fullPathFile := path.Join(baseFolder, j.OutputFile)
-	os.MkdirAll(path.Dir(fullPathFile), os.ModePerm)
+	jobResults := j.Execute(dc, ctx)
 
-	file, _ := os.Create(fullPathFile)
-	defer file.Close()
-	_, _ = file.Write(result)
-}
-
-func (j CustomJob) CustomCollect(baseFolder string, cs *crdClient.Clientset) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	result := j.RetrieveFunction(cs, ctx)
-
-	fullPathFile := path.Join(baseFolder, j.OutputFile)
-	os.MkdirAll(path.Dir(fullPathFile), os.ModePerm)
-
-	file, _ := os.Create(fullPathFile)
-	defer file.Close()
-	_, _ = file.Write(result)
-}
-
-func (j MetricsJob) MetricsCollect(baseFolder string, cs *metricsClient.Clientset) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	result := j.RetrieveFunction(cs, ctx)
-
-	fullPathFile := path.Join(baseFolder, j.OutputFile)
-	os.MkdirAll(path.Dir(fullPathFile), os.ModePerm)
-
-	file, _ := os.Create(fullPathFile)
-	defer file.Close()
-	_, _ = file.Write(result)
+	for fileName, fileValue := range jobResults {
+		os.MkdirAll(path.Dir(fileName), os.ModePerm)
+		file, _ := os.Create(fileName)
+		_, _ = file.Write(fileValue)
+		file.Close()
+	}
 }
