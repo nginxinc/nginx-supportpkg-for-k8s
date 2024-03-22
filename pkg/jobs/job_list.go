@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nginxinc/kubectl-kic-supportpkg/internal/data_collector"
+	"github.com/nginxinc/kubectl-kic-supportpkg/pkg/data_collector"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -188,21 +188,29 @@ func JobList() []Job {
 			},
 		},
 		{
-			Name:   "helm-information",
+			Name:   "helm-info",
 			Global: true,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
 				jobResults := make(map[string][]byte)
-				settings := dc.K8sHelmClientSet.GetSettings()
-				//release, _ := dc.K8sHelmClientSet.GetRelease("nginx-ingress-0")
-				//fmt.Printf(release.Name)
+				settings := dc.K8sHelmClientSet[dc.Namespaces[0]].GetSettings()
 				jsonSettings, _ := json.MarshalIndent(settings, "", "  ")
 				jobResults[path.Join(dc.BaseDir, "helm", "settings.json")] = jsonSettings
-				releases, err := dc.K8sHelmClientSet.ListDeployedReleases()
-				if err != nil {
-					fmt.Printf("Error: %s", err)
+				return jobResults
+			},
+		},
+		{
+			Name:   "helm-deployments",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					releases, _ := dc.K8sHelmClientSet[namespace].ListDeployedReleases()
+					for _, release := range releases {
+						jsonRelease, _ := json.MarshalIndent(release, "", "  ")
+						jobResults[path.Join(dc.BaseDir, "helm", namespace, release.Name+"_release.json")] = jsonRelease
+						jobResults[path.Join(dc.BaseDir, "helm", namespace, release.Name+"_manifest.txt")] = []byte(release.Manifest)
+					}
 				}
-				jsonReleases, _ := json.MarshalIndent(releases, "", "  ")
-				jobResults[path.Join(dc.BaseDir, "helm", "releases.json")] = jsonReleases
 				return jobResults
 			},
 		},
