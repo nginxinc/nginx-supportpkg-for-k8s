@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/nginxinc/kubectl-kic-supportpkg/internal/data_collector"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -34,18 +35,20 @@ func JobList() []Job {
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
 				results := make(map[string][]byte)
 				for _, namespace := range dc.Namespaces {
-					pods, _ := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{FieldSelector: "name"})
+					pods, _ := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
 					for _, pod := range pods.Items {
-						logFileName := path.Join(dc.BaseDir, namespace, "logs", pod.Name+".txt")
-						bufferedLogs := dc.K8sCoreClientSet.CoreV1().Pods(namespace).GetLogs(pod.Name, &corev1.PodLogOptions{})
-						podLogs, err := bufferedLogs.Stream(context.TODO())
-						if err != nil {
-							log.Fatal("error in opening stream")
+						for _, container := range pod.Spec.Containers {
+							logFileName := path.Join(dc.BaseDir, namespace, "logs", fmt.Sprintf("%s__%s.txt", pod.Name, container.Name))
+							bufferedLogs := dc.K8sCoreClientSet.CoreV1().Pods(namespace).GetLogs(pod.Name, &corev1.PodLogOptions{Container: container.Name})
+							podLogs, err := bufferedLogs.Stream(context.TODO())
+							if err != nil {
+								log.Fatal("error in opening stream")
+							}
+							buf := new(bytes.Buffer)
+							_, _ = io.Copy(buf, podLogs)
+							podLogs.Close()
+							results[logFileName] = buf.Bytes()
 						}
-						buf := new(bytes.Buffer)
-						_, _ = io.Copy(buf, podLogs)
-						podLogs.Close()
-						results[logFileName] = buf.Bytes()
 					}
 				}
 				return results
@@ -190,9 +193,14 @@ func JobList() []Job {
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
 				jobResults := make(map[string][]byte)
 				settings := dc.K8sHelmClientSet.GetSettings()
+				//release, _ := dc.K8sHelmClientSet.GetRelease("nginx-ingress-0")
+				//fmt.Printf(release.Name)
 				jsonSettings, _ := json.MarshalIndent(settings, "", "  ")
 				jobResults[path.Join(dc.BaseDir, "helm", "settings.json")] = jsonSettings
-				releases, _ := dc.K8sHelmClientSet.ListDeployedReleases()
+				releases, err := dc.K8sHelmClientSet.ListDeployedReleases()
+				if err != nil {
+					fmt.Printf("Error: %s", err)
+				}
 				jsonReleases, _ := json.MarshalIndent(releases, "", "  ")
 				jobResults[path.Join(dc.BaseDir, "helm", "releases.json")] = jsonReleases
 				return jobResults
