@@ -44,8 +44,9 @@ func Execute() {
 		},
 	}
 
-	rootCmd.Flags().StringSliceVarP(&namespaces, "namespace", "n", []string{}, "comma-separated list of namespaces to collect information from")
-	rootCmd.SetUsageTemplate("Usage: \n kic-supportpkg -n namespace1 -n namespace2 ...")
+	rootCmd.Flags().StringSliceVarP(&namespaces, "namespace", "n", []string{}, "list of namespaces to collect information from")
+	rootCmd.MarkFlagRequired("namespace")
+	rootCmd.SetUsageTemplate("Usage: \n kic supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 ...\n kic supportpkg [-n|--namespace] ns1,ns2 ...\n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
