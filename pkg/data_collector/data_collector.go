@@ -65,8 +65,6 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 
 func (c *DataCollector) WrapUp() error {
 
-	// Create the tarball file
-	//wd, _ := os.Getwd()
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
 	tarballName := fmt.Sprintf("kic-supportpkg-%s.tar.gz", unixTimeString)
@@ -92,10 +90,14 @@ func (c *DataCollector) WrapUp() error {
 		if err != nil {
 			return err
 		}
-		header.Name = path
-		//TODO: correct this to relative path
 
-		if err := tw.WriteHeader(header); err != nil {
+		relativePath, err := filepath.Rel(c.BaseDir, path)
+		if err != nil {
+			return err
+		}
+		header.Name = relativePath
+
+		if err = tw.WriteHeader(header); err != nil {
 			return err
 		}
 
@@ -103,7 +105,7 @@ func (c *DataCollector) WrapUp() error {
 			return nil
 		}
 
-		file, err := os.Open(path)
+		file, err = os.Open(path)
 		if err != nil {
 			return err
 		}
@@ -116,8 +118,6 @@ func (c *DataCollector) WrapUp() error {
 
 		return nil
 	})
-
-	fmt.Println("Tarball created successfully:", tarballName)
-	os.RemoveAll(c.BaseDir)
+	_ = os.RemoveAll(c.BaseDir)
 	return nil
 }
