@@ -63,7 +63,7 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	return &dc, nil
 }
 
-func (c *DataCollector) WrapUp() error {
+func (c *DataCollector) WrapUp() (string, error) {
 
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
@@ -71,7 +71,7 @@ func (c *DataCollector) WrapUp() error {
 
 	file, err := os.Create(tarballName)
 	if err != nil {
-		return err
+		return "",err
 	}
 	defer file.Close()
 
@@ -119,5 +119,5 @@ func (c *DataCollector) WrapUp() error {
 		return nil
 	})
 	_ = os.RemoveAll(c.BaseDir)
-	return nil
+	return tarballName, nil
 }

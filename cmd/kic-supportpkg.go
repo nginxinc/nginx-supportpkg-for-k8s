@@ -28,16 +28,18 @@ func Execute() {
 				fmt.Printf("Running job %s...", job.Name)
 				err = job.Collect(collector)
 				if err != nil {
-					fmt.Printf("Error: %s", err)
+					fmt.Printf("Error: %s\n", err)
 				} else {
 					fmt.Print(" OK\n")
 				}
 			}
 
-			err = collector.WrapUp()
+			tarFile, err := collector.WrapUp()
 			if err != nil {
 				fmt.Println(fmt.Errorf("error when wrapping up: %s", err))
 				os.Exit(1)
+			} else {
+				fmt.Printf("Supportpkg successfully generated: %s\n", tarFile)
 			}
 		},
 	}
