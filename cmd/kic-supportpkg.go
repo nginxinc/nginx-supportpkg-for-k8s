@@ -28,22 +28,25 @@ func Execute() {
 				fmt.Printf("Running job %s...", job.Name)
 				err = job.Collect(collector)
 				if err != nil {
-					fmt.Printf("Error: %s", err)
+					fmt.Printf("Error: %s\n", err)
 				} else {
 					fmt.Print(" OK\n")
 				}
 			}
 
-			err = collector.WrapUp()
+			tarFile, err := collector.WrapUp()
 			if err != nil {
 				fmt.Println(fmt.Errorf("error when wrapping up: %s", err))
 				os.Exit(1)
+			} else {
+				fmt.Printf("Supportpkg successfully generated: %s\n", tarFile)
 			}
 		},
 	}
 
-	rootCmd.Flags().StringSliceVarP(&namespaces, "namespace", "n", []string{}, "comma-separated list of namespaces to collect information from")
-	rootCmd.SetUsageTemplate("Usage: \n kic-supportpkg -n namespace1 -n namespace2 ...")
+	rootCmd.Flags().StringSliceVarP(&namespaces, "namespace", "n", []string{}, "list of namespaces to collect information from")
+	rootCmd.MarkFlagRequired("namespace")
+	rootCmd.SetUsageTemplate("Usage: \n kic supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 ...\n kic supportpkg [-n|--namespace] ns1,ns2 ...\n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

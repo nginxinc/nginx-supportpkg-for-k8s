@@ -35,12 +35,14 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	}
 
 	// Find config
-	home := homedir.HomeDir()
-	kubeConfig := filepath.Join(home, ".kube", "config")
+	kubeConfig := os.Getenv("KUBECONFIG")
+	if kubeConfig == "" {
+		kubeConfig = filepath.Join(homedir.HomeDir(), ".kube", "config")
+	}
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to create k8s config: %s", err)
+		return nil, fmt.Errorf("unable to connect to k8s using file %s: %s", kubeConfig, err)
 	}
 
 	dc := DataCollector{
@@ -63,17 +65,15 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	return &dc, nil
 }
 
-func (c *DataCollector) WrapUp() error {
+func (c *DataCollector) WrapUp() (string, error) {
 
-	// Create the tarball file
-	//wd, _ := os.Getwd()
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
 	tarballName := fmt.Sprintf("kic-supportpkg-%s.tar.gz", unixTimeString)
 
 	file, err := os.Create(tarballName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
@@ -92,10 +92,14 @@ func (c *DataCollector) WrapUp() error {
 		if err != nil {
 			return err
 		}
-		header.Name = path
-		//TODO: correct this to relative path
 
-		if err := tw.WriteHeader(header); err != nil {
+		relativePath, err := filepath.Rel(c.BaseDir, path)
+		if err != nil {
+			return err
+		}
+		header.Name = relativePath
+
+		if err = tw.WriteHeader(header); err != nil {
 			return err
 		}
 
@@ -103,7 +107,7 @@ func (c *DataCollector) WrapUp() error {
 			return nil
 		}
 
-		file, err := os.Open(path)
+		file, err = os.Open(path)
 		if err != nil {
 			return err
 		}
@@ -116,8 +120,6 @@ func (c *DataCollector) WrapUp() error {
 
 		return nil
 	})
-
-	fmt.Println("Tarball created successfully:", tarballName)
-	os.RemoveAll(c.BaseDir)
-	return nil
+	_ = os.RemoveAll(c.BaseDir)
+	return tarballName, nil
 }
