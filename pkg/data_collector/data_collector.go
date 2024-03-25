@@ -35,12 +35,14 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	}
 
 	// Find config
-	home := homedir.HomeDir()
-	kubeConfig := filepath.Join(home, ".kube", "config")
+	kubeConfig := os.Getenv("KUBECONFIG")
+	if kubeConfig == "" {
+		kubeConfig = filepath.Join(homedir.HomeDir(), ".kube", "config")
+	}
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to create k8s config: %s", err)
+		return nil, fmt.Errorf("unable to connect to k8s using file %s: %s", kubeConfig, err)
 	}
 
 	dc := DataCollector{
@@ -71,7 +73,7 @@ func (c *DataCollector) WrapUp() (string, error) {
 
 	file, err := os.Create(tarballName)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 	defer file.Close()
 
