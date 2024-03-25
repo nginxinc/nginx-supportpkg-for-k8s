@@ -172,6 +172,28 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:   "events-info",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				result, _ := dc.K8sCoreClientSet.CoreV1().Events("").List(ctx, metav1.ListOptions{})
+				jsonResult, _ := json.MarshalIndent(result, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "k8s", "events.json")] = jsonResult
+				return jobResults
+			},
+		},
+		{
+			Name:   "secrets-info",
+			Global: true,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				result, _ := dc.K8sCoreClientSet.CoreV1().Secrets("").List(ctx, metav1.ListOptions{})
+				jsonResult, _ := json.MarshalIndent(result, "", "  ")
+				jobResults[path.Join(dc.BaseDir, "k8s", "secrets.json")] = jsonResult
+				return jobResults
+			},
+		},
+		{
 			Name:   "metrics-information",
 			Global: true,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
