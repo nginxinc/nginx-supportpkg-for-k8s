@@ -55,6 +55,20 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:   "events-list",
+			Global: false,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
+				jobResults := make(map[string][]byte)
+				for _, namespace := range dc.Namespaces {
+					result, _ := dc.K8sCoreClientSet.CoreV1().Events(namespace).List(ctx, metav1.ListOptions{})
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResults[path.Join(dc.BaseDir, namespace, "events.json")] = jsonResult
+				}
+
+				return jobResults
+			},
+		},
+		{
 			Name:   "configmap-list",
 			Global: false,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context) map[string][]byte {
