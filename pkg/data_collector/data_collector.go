@@ -70,6 +70,7 @@ func (c *DataCollector) WrapUp() (string, error) {
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
 	tarballName := fmt.Sprintf("kic-supportpkg-%s.tar.gz", unixTimeString)
+	tarballRootDirName := fmt.Sprintf("kic-supportpkg-%s", unixTimeString)
 
 	file, err := os.Create(tarballName)
 	if err != nil {
@@ -97,7 +98,7 @@ func (c *DataCollector) WrapUp() (string, error) {
 		if err != nil {
 			return err
 		}
-		header.Name = relativePath
+		header.Name = tarballRootDirName + "/" + relativePath
 
 		if err = tw.WriteHeader(header); err != nil {
 			return err
