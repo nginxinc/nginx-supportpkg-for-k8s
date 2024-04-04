@@ -28,7 +28,7 @@ func Execute() {
 				fmt.Printf("Running job %s...", job.Name)
 				err = job.Collect(collector)
 				if err != nil {
-					fmt.Printf("Error: %s\n", err)
+					fmt.Printf(" Error: %s\n", err)
 				} else {
 					fmt.Print(" OK\n")
 				}
