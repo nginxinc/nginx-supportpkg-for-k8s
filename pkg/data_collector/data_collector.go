@@ -2,13 +2,18 @@ package data_collector
 
 import (
 	"archive/tar"
+	"bytes"
 	"compress/gzip"
 	"fmt"
 	helmClient "github.com/mittwald/go-helm-client"
 	"io"
+	corev1 "k8s.io/api/core/v1"
 	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
 	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
 	"os"
@@ -20,6 +25,7 @@ import (
 type DataCollector struct {
 	BaseDir             string
 	Namespaces          []string
+	K8sRestConfig       *rest.Config
 	K8sCoreClientSet    *kubernetes.Clientset
 	K8sCrdClientSet     *crdClient.Clientset
 	K8sMetricsClientSet *metricsClient.Clientset
@@ -52,6 +58,7 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	}
 
 	//Initialize clients
+	dc.K8sRestConfig = config
 	dc.K8sCoreClientSet, _ = kubernetes.NewForConfig(config)
 	dc.K8sCrdClientSet, _ = crdClient.NewForConfig(config)
 	dc.K8sMetricsClientSet, _ = metricsClient.NewForConfig(config)
@@ -123,4 +130,28 @@ func (c *DataCollector) WrapUp() (string, error) {
 	})
 	_ = os.RemoveAll(c.BaseDir)
 	return tarballName, nil
+}
+
+func (c *DataCollector) PodExecutor(namespace string, pod string, command []string) ([]byte,error) {
+	req := c.K8sCoreClientSet.CoreV1().RESTClient().Post().
+		Namespace(namespace).
+		Resource("pods").
+		Name(pod).
+		SubResource("exec").
+		VersionedParams(&corev1.PodExecOptions{
+			Command: command,
+			Stdin:   false,
+			Stdout:  true,
+			Stderr:  true,
+			TTY:     true,
+		}, scheme.ParameterCodec)
+
+	exec, _ := remotecommand.NewSPDYExecutor(c.K8sRestConfig, "POST", req.URL())
+	var stdout, stderr bytes.Buffer
+	err := exec.Stream(remotecommand.StreamOptions{
+		Stdin:  nil,
+		Stdout: &stdout,
+		Stderr: &stderr,
+	})
+	return stdout.Bytes(), err
 }
