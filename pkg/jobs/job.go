@@ -12,7 +12,6 @@ import (
 
 type Job struct {
 	Name    string
-	Global  bool
 	Timeout time.Duration
 	Execute func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult)
 }

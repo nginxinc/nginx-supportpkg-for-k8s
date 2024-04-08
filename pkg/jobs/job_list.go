@@ -18,7 +18,6 @@ func JobList() []Job {
 	jobList := []Job{
 		{
 			Name:    "pod-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -33,7 +32,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "collect-pods-logs",
-			Global:  false,
 			Timeout: time.Second * 30,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -56,7 +54,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "events-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -71,7 +68,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "configmap-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -86,7 +82,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "service-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -101,7 +96,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "deployment-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -116,7 +110,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "statefulset-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -131,7 +124,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "replicaset-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -146,7 +138,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "lease-list",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -161,7 +152,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "k8s-version",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -173,7 +163,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "crd-info",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -185,7 +174,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "nodes-info",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -197,7 +185,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "events-info",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -209,7 +196,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "secrets-info",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -221,7 +207,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "metrics-information",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -238,7 +223,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "helm-info",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -250,7 +234,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "helm-deployments",
-			Global:  false,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
@@ -267,7 +250,6 @@ func JobList() []Job {
 		},
 		{
 			Name:    "exec-nginx-t",
-			Global:  true,
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
