@@ -27,7 +27,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve pod list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "pods.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "pods.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -45,7 +45,7 @@ func JobList() []Job {
 					}
 					for _, pod := range pods.Items {
 						for _, container := range pod.Spec.Containers {
-							logFileName := path.Join(dc.BaseDir, namespace, "logs", fmt.Sprintf("%s__%s.txt", pod.Name, container.Name))
+							logFileName := path.Join(dc.BaseDir, "logs", namespace, fmt.Sprintf("%s__%s.txt", pod.Name, container.Name))
 							bufferedLogs := dc.K8sCoreClientSet.CoreV1().Pods(namespace).GetLogs(pod.Name, &corev1.PodLogOptions{Container: container.Name})
 							podLogs, err := bufferedLogs.Stream(context.TODO())
 							if err != nil {
@@ -77,7 +77,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve events list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "events.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "events.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -94,7 +94,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve configmap list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "configmaps.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "configmaps.json")] = jsonResult
 					}
 				}
 
@@ -112,7 +112,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve services list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "services.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "services.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -129,7 +129,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve deployments list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "deployments.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "deployments.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -146,7 +146,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve statefulsets list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "statefulsets.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "statefulsets.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -163,7 +163,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve replicasets list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "replicasets.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "replicasets.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -180,7 +180,7 @@ func JobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve leases list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, namespace, "leases.json")] = jsonResult
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "leases.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -307,7 +307,7 @@ func JobList() []Job {
 								if err != nil {
 									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
 								} else {
-									jobResult.Files[path.Join(dc.BaseDir, namespace, pod.Name+"-nginx-t.txt")] = res
+									jobResult.Files[path.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-t.txt")] = res
 								}
 							}
 						}
