@@ -158,12 +158,20 @@ func (c *DataCollector) PodExecutor(namespace string, pod string, command []stri
 			TTY:     true,
 		}, scheme.ParameterCodec)
 
-	exec, _ := remotecommand.NewSPDYExecutor(c.K8sRestConfig, "POST", req.URL())
+	exec, err := remotecommand.NewSPDYExecutor(c.K8sRestConfig, "POST", req.URL())
+	if err != nil {
+		return nil, err
+	}
 	var stdout, stderr bytes.Buffer
-	err := exec.StreamWithContext(ctx, remotecommand.StreamOptions{
+	err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 		Stdin:  nil,
 		Stdout: &stdout,
 		Stderr: &stderr,
 	})
-	return stdout.Bytes(), err
+	if stdout.Len() > 0 || stderr.Len() > 0 {
+		response := append(stdout.Bytes(), stderr.Bytes()...)
+		return response, nil
+	} else {
+		return nil, err
+	}
 }

@@ -41,7 +41,6 @@ func (j Job) Collect(dc *data_collector.DataCollector) error {
 			return jobResults.Error
 		}
 
-		dc.Logger.Printf("\tJob %s completed successfully\n", j.Name)
 		for fileName, fileValue := range jobResults.Files {
 			err := os.MkdirAll(path.Dir(fileName), os.ModePerm)
 			if err != nil {
@@ -53,7 +52,9 @@ func (j Job) Collect(dc *data_collector.DataCollector) error {
 				return err
 			}
 			_ = file.Close()
+			dc.Logger.Printf("\tJob %s wrote file %s\n", j.Name, fileName)
 		}
+		dc.Logger.Printf("\tJob %s completed successfully\n---\n", j.Name)
 		return nil
 	}
 }
