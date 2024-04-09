@@ -11,6 +11,7 @@ The plugin collects the following global and namespace-specific information:
 - list of pods, events, configmaps, services, deployments, statefulsets, replicasets and leases
 - k8s metrics
 - helm deployments
+- `nginx -T` output from the KIC pods
 
 ## Installation
 
