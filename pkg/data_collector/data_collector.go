@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"context"
 	"fmt"
 	helmClient "github.com/mittwald/go-helm-client"
 	"io"
@@ -16,6 +17,7 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
 	metricsClient "k8s.io/metrics/pkg/client/clientset/versioned"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -25,6 +27,8 @@ import (
 type DataCollector struct {
 	BaseDir             string
 	Namespaces          []string
+	Logger              *log.Logger
+	LogFile             *os.File
 	K8sRestConfig       *rest.Config
 	K8sCoreClientSet    *kubernetes.Clientset
 	K8sCrdClientSet     *crdClient.Clientset
@@ -35,9 +39,13 @@ type DataCollector struct {
 func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 
 	tmpDir, err := os.MkdirTemp("", "kic-diag")
-
 	if err != nil {
 		return nil, fmt.Errorf("unable to create temp directory: %s", err)
+	}
+
+	logFile, err := os.OpenFile(filepath.Join(tmpDir, "kic-supportpkg.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create log file: %s", err)
 	}
 
 	// Find config
@@ -54,6 +62,8 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	dc := DataCollector{
 		BaseDir:          tmpDir,
 		Namespaces:       namespaces,
+		LogFile:          logFile,
+		Logger:           log.New(logFile, "", log.LstdFlags|log.LUTC|log.Lmicroseconds|log.Lshortfile),
 		K8sHelmClientSet: make(map[string]helmClient.Client),
 	}
 
@@ -78,6 +88,8 @@ func (c *DataCollector) WrapUp() (string, error) {
 	unixTimeString := strconv.FormatInt(unixTime, 10)
 	tarballName := fmt.Sprintf("kic-supportpkg-%s.tar.gz", unixTimeString)
 	tarballRootDirName := fmt.Sprintf("kic-supportpkg-%s", unixTimeString)
+
+	c.LogFile.Close()
 
 	file, err := os.Create(tarballName)
 	if err != nil {
@@ -132,7 +144,7 @@ func (c *DataCollector) WrapUp() (string, error) {
 	return tarballName, nil
 }
 
-func (c *DataCollector) PodExecutor(namespace string, pod string, command []string) ([]byte,error) {
+func (c *DataCollector) PodExecutor(namespace string, pod string, command []string, ctx context.Context) ([]byte, error) {
 	req := c.K8sCoreClientSet.CoreV1().RESTClient().Post().
 		Namespace(namespace).
 		Resource("pods").
@@ -148,7 +160,7 @@ func (c *DataCollector) PodExecutor(namespace string, pod string, command []stri
 
 	exec, _ := remotecommand.NewSPDYExecutor(c.K8sRestConfig, "POST", req.URL())
 	var stdout, stderr bytes.Buffer
-	err := exec.Stream(remotecommand.StreamOptions{
+	err := exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 		Stdin:  nil,
 		Stdout: &stdout,
 		Stderr: &stderr,
