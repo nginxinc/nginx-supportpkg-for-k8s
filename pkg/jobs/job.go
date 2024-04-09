@@ -52,7 +52,7 @@ func (j Job) Collect(dc *data_collector.DataCollector) error {
 				return err
 			}
 			_ = file.Close()
-			dc.Logger.Printf("\tJob %s wrote file %s\n", j.Name, fileName)
+			dc.Logger.Printf("\tJob %s wrote %d bytes to %s\n", j.Name, len(fileValue), fileName)
 		}
 		dc.Logger.Printf("\tJob %s completed successfully\n---\n", j.Name)
 		return nil
