@@ -221,6 +221,23 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:    "serviceaccounts-list",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				for _, namespace := range dc.Namespaces {
+					result, err := dc.K8sCoreClientSet.CoreV1().ServiceAccounts(namespace).List(ctx, metav1.ListOptions{})
+					if err != nil {
+						dc.Logger.Printf("\tCould not retrieve serviceaccounts list for namespace %s: %v\n", namespace, err)
+					} else {
+						jsonResult, _ := json.MarshalIndent(result, "", "  ")
+						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "serviceaccounts.json")] = jsonResult
+					}
+				}
+				ch <- jobResult
+			},
+		},
+		{
 			Name:    "rolebindings-list",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
