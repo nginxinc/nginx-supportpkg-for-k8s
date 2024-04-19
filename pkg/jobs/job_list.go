@@ -153,6 +153,23 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:    "daemonsets-list",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				for _, namespace := range dc.Namespaces {
+					result, err := dc.K8sCoreClientSet.AppsV1().DaemonSets(namespace).List(ctx, metav1.ListOptions{})
+					if err != nil {
+						dc.Logger.Printf("\tCould not retrieve daemonsets list for namespace %s: %v\n", namespace, err)
+					} else {
+						jsonResult, _ := json.MarshalIndent(result, "", "  ")
+						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "daemonsets.json")] = jsonResult
+					}
+				}
+				ch <- jobResult
+			},
+		},
+		{
 			Name:    "replicaset-list",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
