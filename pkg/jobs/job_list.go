@@ -204,6 +204,40 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:    "roles-list",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				for _, namespace := range dc.Namespaces {
+					result, err := dc.K8sCoreClientSet.RbacV1().Roles(namespace).List(ctx, metav1.ListOptions{})
+					if err != nil {
+						dc.Logger.Printf("\tCould not retrieve roles list for namespace %s: %v\n", namespace, err)
+					} else {
+						jsonResult, _ := json.MarshalIndent(result, "", "  ")
+						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "roles.json")] = jsonResult
+					}
+				}
+				ch <- jobResult
+			},
+		},
+		{
+			Name:    "rolebindings-list",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				for _, namespace := range dc.Namespaces {
+					result, err := dc.K8sCoreClientSet.RbacV1().RoleBindings(namespace).List(ctx, metav1.ListOptions{})
+					if err != nil {
+						dc.Logger.Printf("\tCould not retrieve role bindings list for namespace %s: %v\n", namespace, err)
+					} else {
+						jsonResult, _ := json.MarshalIndent(result, "", "  ")
+						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "rolebindings.json")] = jsonResult
+					}
+				}
+				ch <- jobResult
+			},
+		},
+		{
 			Name:    "k8s-version",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
