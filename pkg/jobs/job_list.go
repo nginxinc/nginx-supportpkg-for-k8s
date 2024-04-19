@@ -234,6 +234,36 @@ func JobList() []Job {
 			},
 		},
 		{
+			Name:    "clusterroles-info",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				result, err := dc.K8sCoreClientSet.RbacV1().ClusterRoles().List(ctx, metav1.ListOptions{})
+				if err != nil {
+					dc.Logger.Printf("\tCould not retrieve clusterroles data: %v\n", err)
+				} else {
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", "clusterroles.json")] = jsonResult
+				}
+				ch <- jobResult
+			},
+		},
+		{
+			Name:    "clusterroles-bindings-info",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				result, err := dc.K8sCoreClientSet.RbacV1().ClusterRoleBindings().List(ctx, metav1.ListOptions{})
+				if err != nil {
+					dc.Logger.Printf("\tCould not retrieve clusterroles binding data: %v\n", err)
+				} else {
+					jsonResult, _ := json.MarshalIndent(result, "", "  ")
+					jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", "clusterrolesbindings.json")] = jsonResult
+				}
+				ch <- jobResult
+			},
+		},
+		{
 			Name:    "nodes-info",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
