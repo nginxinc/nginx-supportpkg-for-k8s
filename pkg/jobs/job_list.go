@@ -393,7 +393,8 @@ func JobList() []Job {
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
-				command := []string{"/bin/sh", "-c", "nginx -T"}
+				//command := []string{"/bin/sh", "-c", "nginx -T"}
+				command := []string{"/usr/sbin/nginx", "-T"}
 				for _, namespace := range dc.Namespaces {
 					pods, err := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
 					if err != nil {
