@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/nginxinc/kubectl-kic-supportpkg/cmd"
+	"github.com/nginxinc/nginx-k8s-supportpkg/cmd"
 )
 
 func main() {

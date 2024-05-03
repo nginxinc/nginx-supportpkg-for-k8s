@@ -1,4 +1,4 @@
-module github.com/nginxinc/kubectl-kic-supportpkg
+module github.com/nginxinc/nginx-k8s-supportpkg
 
 go 1.21.5
 

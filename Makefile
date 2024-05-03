@@ -1,5 +1,5 @@
 build:
-	go build -o cmd/kubectl-kic-supportpkg
+	go build -o cmd/kubectl-nic-supportpkg
 
 install: build
-	sudo cp cmd/kubectl-kic-supportpkg /usr/local/bin
+	sudo cp cmd/kubectl-nic-supportpkg /usr/local/bin

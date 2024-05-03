@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/nginxinc/kubectl-kic-supportpkg/pkg/data_collector"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
 	"os"
 	"path"
 	"time"

@@ -1,6 +1,6 @@
-# kubectl-kic-supportpkg
+# nginx-k8s-supportpkg
 
-A kubectl plugin designed to collect diagnostics information on the designated namespaces.
+A kubectl plugin designed to collect NIC diagnostics information on the designated namespaces.
 
 ## Features
 
@@ -11,7 +11,7 @@ The plugin collects the following global and namespace-specific information:
 - list of pods, events, configmaps, services, deployments, statefulsets, replicasets and leases
 - k8s metrics
 - helm deployments
-- `nginx -T` output from the KIC pods
+- `nginx -T` output from the NIC pods
 
 ## Installation
 
@@ -23,15 +23,15 @@ Verify that the plugin is properly found by `kubectl`:
 $ kubectl plugin list
 The following compatible plugins are available:
 
-/usr/local/bin/kubectl-kic-supportpkg
+/usr/local/bin/kubectl-nic-supportpkg
 ```
 
 ## Usage
 
-The plugin is invoked via `kubectl kic supportpkg` and has only one required flag, `-n` or `--namespace`:
+The plugin is invoked via `kubectl nic supportpkg` and has only one required flag, `-n` or `--namespace`:
 
 ```
-$ kubectl kic supportpkg -n default -n nginx-ingress-0
+$ kubectl nic supportpkg -n default -n nginx-ingress-0
 Running job pod-list... OK
 Running job collect-pods-logs... OK
 Running job events-list... OK
@@ -47,6 +47,6 @@ Running job nodes-info... OK
 Running job metrics-information... OK
 Running job helm-info... OK
 Running job helm-deployments... OK
-Supportpkg successfully generated: kic-supportpkg-1711384966.tar.gz
+Supportpkg successfully generated: nic-supportpkg-1711384966.tar.gz
 
 ```

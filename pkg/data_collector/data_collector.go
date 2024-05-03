@@ -38,12 +38,12 @@ type DataCollector struct {
 
 func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 
-	tmpDir, err := os.MkdirTemp("", "kic-diag")
+	tmpDir, err := os.MkdirTemp("", "nic-diag")
 	if err != nil {
 		return nil, fmt.Errorf("unable to create temp directory: %s", err)
 	}
 
-	logFile, err := os.OpenFile(filepath.Join(tmpDir, "kic-supportpkg.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(filepath.Join(tmpDir, "nic-supportpkg.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create log file: %s", err)
 	}
@@ -86,8 +86,8 @@ func (c *DataCollector) WrapUp() (string, error) {
 
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
-	tarballName := fmt.Sprintf("kic-supportpkg-%s.tar.gz", unixTimeString)
-	tarballRootDirName := fmt.Sprintf("kic-supportpkg-%s", unixTimeString)
+	tarballName := fmt.Sprintf("nic-supportpkg-%s.tar.gz", unixTimeString)
+	tarballRootDirName := fmt.Sprintf("nic-supportpkg-%s", unixTimeString)
 
 	c.LogFile.Close()
 

@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/nginxinc/kubectl-kic-supportpkg/pkg/data_collector"
-	"github.com/nginxinc/kubectl-kic-supportpkg/pkg/jobs"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/jobs"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -13,9 +13,9 @@ func Execute() {
 	var namespaces []string
 
 	var rootCmd = &cobra.Command{
-		Use:   "kic-supportpkg",
-		Short: "kic-supportpkg - a tool to create Ingress Controller diagnostics package",
-		Long:  `kic-supportpkg - a tool to create Ingress Controller diagnostics package`,
+		Use:   "nic-supportpkg",
+		Short: "nic-supportpkg - a tool to create Ingress Controller diagnostics package",
+		Long:  `nic-supportpkg - a tool to create Ingress Controller diagnostics package`,
 		Run: func(cmd *cobra.Command, args []string) {
 
 			collector, err := data_collector.NewDataCollector(namespaces...)
@@ -46,7 +46,7 @@ func Execute() {
 
 	rootCmd.Flags().StringSliceVarP(&namespaces, "namespace", "n", []string{}, "list of namespaces to collect information from")
 	rootCmd.MarkFlagRequired("namespace")
-	rootCmd.SetUsageTemplate("Usage: \n kic supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 ...\n kic supportpkg [-n|--namespace] ns1,ns2 ...\n")
+	rootCmd.SetUsageTemplate("Usage: \n nic supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 ...\n nic supportpkg [-n|--namespace] ns1,ns2 ...\n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
