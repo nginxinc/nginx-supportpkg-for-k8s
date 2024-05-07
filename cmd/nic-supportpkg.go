@@ -46,7 +46,7 @@ func Execute() {
 					fmt.Printf("Supportpkg successfully generated: %s\n", tarFile)
 				}
 			} else {
-				fmt.Println(" Error: all namespaces do not exist")
+				fmt.Println(" Error: Some namespaces do not exist")
 			}
 		},
 	}
