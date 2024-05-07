@@ -10,6 +10,7 @@ import (
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -174,4 +175,18 @@ func (c *DataCollector) PodExecutor(namespace string, pod string, command []stri
 	} else {
 		return nil, err
 	}
+}
+
+func (c *DataCollector) AllNamespacesExist() bool {
+	var allExist bool = true
+	for _, namespace := range c.Namespaces {
+		_, err := c.K8sCoreClientSet.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
+		if err != nil {
+			c.Logger.Printf("\t%s: %v\n", namespace, err)
+			fmt.Printf("\t%s: %v\n", namespace, err)
+			allExist = false
+		}
+	}
+
+	return allExist
 }

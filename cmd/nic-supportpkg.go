@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/jobs"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 )
 
@@ -26,8 +24,7 @@ func Execute() {
 				os.Exit(1)
 			}
 
-			if allNamespacesExist(collector) == true {
-
+			if collector.AllNamespacesExist() == true {
 				for _, job := range jobs.JobList() {
 					fmt.Printf("Running job %s...", job.Name)
 					err = job.Collect(collector)
@@ -62,19 +59,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func allNamespacesExist(dc *data_collector.DataCollector) bool {
-
-	var allExist bool = true
-	for _, namespace := range dc.Namespaces {
-		_, err := dc.K8sCoreClientSet.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
-		if err != nil {
-			dc.Logger.Printf("\t%s: %v\n", namespace, err)
-			fmt.Printf("\t%s: %v\n", namespace, err)
-			allExist = false
-		}
-	}
-
-	return allExist
 }
