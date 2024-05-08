@@ -90,21 +90,45 @@ func (c *DataCollector) WrapUp() (string, error) {
 	tarballName := fmt.Sprintf("nic-supportpkg-%s.tar.gz", unixTimeString)
 	tarballRootDirName := fmt.Sprintf("nic-supportpkg-%s", unixTimeString)
 
-	c.LogFile.Close()
+	err := c.LogFile.Close()
+	if err != nil {
+		return tarballName, err
+	}
 
 	file, err := os.Create(tarballName)
 	if err != nil {
-		return "", err
+		return tarballName, err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		cerr := file.Close()
+		if cerr == nil {
+			err = cerr
+		} else {
+			c.Logger.Printf("error closing file %s, %v", file.Name(), cerr)
+		}
+	}(file)
 
 	gw := gzip.NewWriter(file)
-	defer gw.Close()
+	defer func(gw *gzip.Writer) {
+		cerr := gw.Close()
+		if cerr == nil {
+			err = cerr
+		} else {
+			c.Logger.Printf("error closing gzip writer, %v", cerr)
+		}
+	}(gw)
 
 	tw := tar.NewWriter(gw)
-	defer tw.Close()
+	defer func(tw *tar.Writer) {
+		cerr := tw.Close()
+		if cerr == nil {
+			err = cerr
+		} else {
+			c.Logger.Printf("error closing tar writer, %v", cerr)
+		}
+	}(tw)
 
-	filepath.Walk(c.BaseDir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(c.BaseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -132,7 +156,14 @@ func (c *DataCollector) WrapUp() (string, error) {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		defer func(file *os.File) {
+			cerr := file.Close()
+			if cerr == nil {
+				err = cerr
+			} else {
+				c.Logger.Printf("error closing file %s, %v", file.Name(), cerr)
+			}
+		}(file)
 
 		_, err = io.Copy(tw, file)
 		if err != nil {
@@ -141,6 +172,9 @@ func (c *DataCollector) WrapUp() (string, error) {
 
 		return nil
 	})
+	if err != nil {
+		return tarballName, err
+	}
 	_ = os.RemoveAll(c.BaseDir)
 	return tarballName, nil
 }
@@ -178,7 +212,7 @@ func (c *DataCollector) PodExecutor(namespace string, pod string, command []stri
 }
 
 func (c *DataCollector) AllNamespacesExist() bool {
-	var allExist bool = true
+	var allExist = true
 	for _, namespace := range c.Namespaces {
 		_, err := c.K8sCoreClientSet.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 		if err != nil {
