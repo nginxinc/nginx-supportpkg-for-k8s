@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/crds"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -409,6 +410,26 @@ func JobList() []Job {
 									jobResult.Files[path.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-t.txt")] = res
 								}
 							}
+						}
+					}
+				}
+				ch <- jobResult
+			},
+		},
+		{
+			Name:    "crd-objects",
+			Timeout: time.Second * 10,
+			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
+				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
+				for _, namespace := range dc.Namespaces {
+					for _, crd := range crds.GetCRDList() {
+						result, err := dc.QueryCRD(crd, namespace, ctx)
+						if err != nil {
+							dc.Logger.Printf("\tCRD %s.%s/%s could not be collected in namespace %s: %v\n", crd.Resource, crd.Group, crd.Version, namespace, err)
+						} else {
+							var jsonResult bytes.Buffer
+							_ = json.Indent(&jsonResult, result, "", "  ")
+							jobResult.Files[path.Join(dc.BaseDir, "crds", namespace, crd.Resource+".json")] = jsonResult.Bytes()
 						}
 					}
 				}

@@ -7,9 +7,11 @@ import (
 	"context"
 	"fmt"
 	helmClient "github.com/mittwald/go-helm-client"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/crds"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	crdClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -209,6 +211,28 @@ func (c *DataCollector) PodExecutor(namespace string, pod string, command []stri
 	} else {
 		return nil, err
 	}
+}
+
+func (c *DataCollector) QueryCRD(crd crds.Crd, namespace string, ctx context.Context) ([]byte, error) {
+
+	schemeGroupVersion := schema.GroupVersion{Group: crd.Group, Version: crd.Version}
+	negotiatedSerializer := scheme.Codecs.WithoutConversion()
+	c.K8sRestConfig.APIPath = "apis"
+	c.K8sRestConfig.GroupVersion = &schemeGroupVersion
+	c.K8sRestConfig.NegotiatedSerializer = negotiatedSerializer
+
+	client, err := rest.RESTClientFor(c.K8sRestConfig)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := client.Get().
+		Namespace(namespace). // Specify the namespace if needed
+		Resource(crd.Resource).
+		Do(ctx)
+
+	return result.Raw()
 }
 
 func (c *DataCollector) AllNamespacesExist() bool {
