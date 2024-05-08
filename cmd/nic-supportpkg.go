@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/jobs"
+	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -23,6 +24,8 @@ func Execute() {
 				fmt.Println(fmt.Errorf("unable to start data collector: %s", err))
 				os.Exit(1)
 			}
+
+			collector.Logger.Printf("Starting kubectl-nic-suportpkg - version: %s - build: %s", version.Version, version.Build)
 
 			if collector.AllNamespacesExist() == true {
 				for _, job := range jobs.JobList() {
