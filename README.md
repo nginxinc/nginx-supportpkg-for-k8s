@@ -1,4 +1,4 @@
-# nginx-k8s-supportpkg
+# nginx-supportpkg-for-k8s
 
 A kubectl plugin designed to collect NIC diagnostics information on the designated namespaces.
 
