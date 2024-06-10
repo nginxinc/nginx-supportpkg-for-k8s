@@ -38,7 +38,7 @@ jobs:
                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION"\
                                                    -o release/kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}/kubectl-nic-supportpkg
         cp LICENSE release/kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}/
-        tar czvf release/kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}.tar.gz -C release kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}
+        tar czvf release/kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}.tar.gz -C release/kubectl-nic-supportpkg_${VERSION}_${OS}_${ARCH}/ .
         done; done
 
     - name: Upload release binaries
