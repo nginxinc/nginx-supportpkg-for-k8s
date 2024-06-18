@@ -44,10 +44,10 @@ The following compatible plugins are available:
 
 ## Usage
 
-The plugin is invoked via `kubectl nic-supportpkg` and has only one required flag, `-n` or `--namespace`:
+The plugin is invoked via `kubectl nic supportpkg` and has only one required flag, `-n` or `--namespace`:
 
 ```
-$ kubectl nic-supportpkg -n default -n nginx-ingress-0
+$ kubectl nic supportpkg -n default -n nginx-ingress-0
 Running job pod-list... OK
 Running job collect-pods-logs... OK
 Running job events-list... OK
