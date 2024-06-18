@@ -13,8 +13,11 @@ The plugin collects the following global and namespace-specific information:
 - helm deployments
 - `nginx -T` output from the NIC pods
 
+The plugin DOES NOT collect secrets or coredums.
+
 ## Installation
 
+### Building from source
 Clone the repo and run `make install`. This will build the binary and copy it on `/usr/local/bin/`.
 
 Verify that the plugin is properly found by `kubectl`:
@@ -24,6 +27,19 @@ $ kubectl plugin list
 The following compatible plugins are available:
 
 /usr/local/bin/kubectl-nic-supportpkg
+```
+
+### Downloading the binary
+
+Navigate to the [releases](https://github.com/nginxinc/nginx-supportpkg-for-k8s/releases) section and download the asset for your operating system and architecture from the most recent version. 
+
+Decompress the tarball and copy the binary somewhere in your `$PATH`. Make sure it is recognized by `kubectl`:
+
+```
+$ kubectl plugin list
+The following compatible plugins are available:
+
+/path/to/plugin/kubectl-nic-supportpkg
 ```
 
 ## Usage
