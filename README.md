@@ -1,19 +1,23 @@
 # nginx-supportpkg-for-k8s
 
-A kubectl plugin designed to collect NIC diagnostics information on the designated namespaces.
+A kubectl plugin designed to collect diagnostics information on any NGINX product running on k8s. 
+
+## Supported products
+
+Currently, [NIC](https://github.com/nginxinc/kubernetes-ingress) is the only supported product.
 
 ## Features
 
-The plugin collects the following global and namespace-specific information:
+Depending on the product, the plugin might collect some or all of the following global and namespace-specific information:
 
 - k8s version, nodes information and CRDs
 - pods logs
 - list of pods, events, configmaps, services, deployments, statefulsets, replicasets and leases
 - k8s metrics
 - helm deployments
-- `nginx -T` output from the NIC pods
+- `nginx -T` output from NGINX pods
 
-The plugin DOES NOT collect secrets or coredums.
+The plugin DOES NOT collect secrets or coredumps.
 
 ## Installation
 
@@ -26,7 +30,7 @@ Verify that the plugin is properly found by `kubectl`:
 $ kubectl plugin list
 The following compatible plugins are available:
 
-/usr/local/bin/kubectl-nic-supportpkg
+/usr/local/bin/kubectl-nginx-supportpkg
 ```
 
 ### Downloading the binary
@@ -39,15 +43,19 @@ Decompress the tarball and copy the binary somewhere in your `$PATH`. Make sure 
 $ kubectl plugin list
 The following compatible plugins are available:
 
-/path/to/plugin/kubectl-nic-supportpkg
+/path/to/plugin/kubectl-nginx-supportpkg
 ```
 
 ## Usage
 
-The plugin is invoked via `kubectl nic supportpkg` and has only one required flag, `-n` or `--namespace`:
+The plugin is invoked via `kubectl nginx-supportpkg` and has two required flags:
+
+* `-n` or `--namespace` indicates the namespace(s) where the product is running.
+* `-p` or `--product` indicates the product to collect information from.
+
 
 ```
-$ kubectl nic supportpkg -n default -n nginx-ingress-0
+$ kubectl nginx-supportpkg -n default -n nginx-ingress-0 -p nic
 Running job pod-list... OK
 Running job collect-pods-logs... OK
 Running job events-list... OK

@@ -1,5 +1,5 @@
 build:
-	go build -o cmd/kubectl-nic-supportpkg
+	go build -o cmd/kubectl-nginx_supportpkg
 
 install: build
-	sudo cp cmd/kubectl-nic-supportpkg /usr/local/bin
+	sudo cp cmd/kubectl-nginx_supportpkg /usr/local/bin

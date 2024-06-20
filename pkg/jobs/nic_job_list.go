@@ -33,7 +33,7 @@ import (
 	"time"
 )
 
-func JobList() []Job {
+func NICJobList() []Job {
 	jobList := []Job{
 		{
 			Name:    "pod-list",

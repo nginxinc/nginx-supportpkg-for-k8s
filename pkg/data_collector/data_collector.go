@@ -103,11 +103,11 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 	return &dc, nil
 }
 
-func (c *DataCollector) WrapUp() (string, error) {
+func (c *DataCollector) WrapUp(product string) (string, error) {
 
 	unixTime := time.Now().Unix()
 	unixTimeString := strconv.FormatInt(unixTime, 10)
-	tarballName := fmt.Sprintf("nic-supportpkg-%s.tar.gz", unixTimeString)
+	tarballName := fmt.Sprintf("%s-supportpkg-%s.tar.gz", product, unixTimeString)
 	tarballRootDirName := fmt.Sprintf("nic-supportpkg-%s", unixTimeString)
 
 	err := c.LogFile.Close()
