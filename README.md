@@ -30,7 +30,7 @@ Verify that the plugin is properly found by `kubectl`:
 $ kubectl plugin list
 The following compatible plugins are available:
 
-/usr/local/bin/kubectl-nginx-supportpkg
+/usr/local/bin/kubectl-nginx_supportpkg
 ```
 
 ### Downloading the binary
@@ -43,7 +43,7 @@ Decompress the tarball and copy the binary somewhere in your `$PATH`. Make sure 
 $ kubectl plugin list
 The following compatible plugins are available:
 
-/path/to/plugin/kubectl-nginx-supportpkg
+/path/to/plugin/kubectl-nginx_supportpkg
 ```
 
 ## Usage
