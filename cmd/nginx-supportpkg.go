@@ -30,11 +30,13 @@ import (
 func Execute() {
 
 	var namespaces []string
+	var product string
+	var jobList []jobs.Job
 
 	var rootCmd = &cobra.Command{
-		Use:   "nic-supportpkg",
-		Short: "nic-supportpkg - a tool to create Ingress Controller diagnostics package",
-		Long:  `nic-supportpkg - a tool to create Ingress Controller diagnostics package`,
+		Use:   "nginx-supportpkg",
+		Short: "nginx-supportpkg - a tool to create Ingress Controller diagnostics package",
+		Long:  `nginx-supportpkg - a tool to create Ingress Controller diagnostics package`,
 		Run: func(cmd *cobra.Command, args []string) {
 
 			collector, err := data_collector.NewDataCollector(namespaces...)
@@ -43,10 +45,18 @@ func Execute() {
 				os.Exit(1)
 			}
 
-			collector.Logger.Printf("Starting kubectl-nic-suportpkg - version: %s - build: %s", version.Version, version.Build)
+			collector.Logger.Printf("Starting kubectl-nginx-suportpkg - version: %s - build: %s", version.Version, version.Build)
 
-			if collector.AllNamespacesExist() == true {
-				for _, job := range jobs.JobList() {
+			switch product {
+			case "nic":
+				jobList = jobs.NICJobList()
+			default:
+				fmt.Printf("Error: product must be in the following list: [nic]\n")
+				os.Exit(1)
+			}
+
+			if collector.AllNamespacesExist() {
+				for _, job := range jobList {
 					fmt.Printf("Running job %s...", job.Name)
 					err = job.Collect(collector)
 					if err != nil {
@@ -56,7 +66,7 @@ func Execute() {
 					}
 				}
 
-				tarFile, err := collector.WrapUp()
+				tarFile, err := collector.WrapUp(product)
 				if err != nil {
 					fmt.Println(fmt.Errorf("error when wrapping up: %s", err))
 					os.Exit(1)
@@ -74,7 +84,14 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	rootCmd.SetUsageTemplate("Usage: \n nic supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 ...\n nic supportpkg [-n|--namespace] ns1,ns2 ...\n")
+
+	rootCmd.Flags().StringVarP(&product, "product", "p", "", "products to collect information from")
+	if err := rootCmd.MarkFlagRequired("product"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	rootCmd.SetUsageTemplate("Usage: \n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] nic...\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] nic...\n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
