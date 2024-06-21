@@ -21,20 +21,20 @@ jobs:
         BUILD=$(git log --format='%H' -n 1)
         VERSION="dev"
         GOOS=linux GOARCH=amd64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nic-supportpkg
-        tar czvf release/kubectl-nic-supportpkg_${VERSION}_linux_amd64.tar.gz -C release kubectl-nic-supportpkg
+                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
+        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_linux_amd64.tar.gz -C release kubectl-nginx_supportpkg
 
         GOOS=linux GOARCH=arm64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nic-supportpkg
-        tar czvf release/kubectl-nic-supportpkg_${VERSION}_linux_arm64.tar.gz -C release kubectl-nic-supportpkg
+                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
+        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_linux_arm64.tar.gz -C release kubectl-nginx_supportpkg
 
         GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nic-supportpkg
-        tar czvf release/kubectl-nic-supportpkg_${VERSION}_darwin_amd64.tar.gz -C release kubectl-nic-supportpkg
+                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
+        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_darwin_amd64.tar.gz -C release kubectl-nginx_supportpkg
 
         GOOS=darwin GOARCH=arm64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nic-supportpkg
-        tar czvf release/kubectl-nic-supportpkg_${VERSION}_darwin_arm64.tar.gz -C release kubectl-nic-supportpkg
+                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
+        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_darwin_arm64.tar.gz -C release kubectl-nginx_supportpkg
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
