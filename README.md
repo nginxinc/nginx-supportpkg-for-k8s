@@ -19,7 +19,19 @@ Depending on the product, the plugin might collect some or all of the following 
 
 The plugin DOES NOT collect secrets or coredumps.
 
+## Prerequisites
+* Install [krew](https://krew.sigs.k8s.io), the plugin manager for kubectl command-line tool, from the [official pages](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
+* Run `kubectl krew` to check the installation
+* Run through some of the examples in krew's [quickstart guide](https://krew.sigs.k8s.io/docs/user-guide/quickstart/)
+
 ## Installation
+
+### Install from krew
+The `nginx-supportpkg` plugin can be found in the list of kubectl plugins distributed on the centralized [krew-index](https://sigs.k8s.io/krew-index).
+
+To install `nginx-supportpkg` plugin on your machine:
+* Run `kubectl krew install nginx-supportpkg`
+
 
 ### Building from source
 Clone the repo and run `make install`. This will build the binary and copy it on `/usr/local/bin/`.
