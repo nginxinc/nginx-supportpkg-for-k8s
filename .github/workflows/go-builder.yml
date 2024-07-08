@@ -20,21 +20,19 @@ jobs:
       run: |
         BUILD=$(git log --format='%H' -n 1)
         VERSION="dev"
-        GOOS=linux GOARCH=amd64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
-        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_linux_amd64.tar.gz -C release kubectl-nginx_supportpkg
+        OSES="linux darwin windows"
+        ARCHS="amd64 arm64"
+        IFS=" "
 
-        GOOS=linux GOARCH=arm64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
-        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_linux_arm64.tar.gz -C release kubectl-nginx_supportpkg
-
-        GOOS=darwin GOARCH=amd64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
-        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_darwin_amd64.tar.gz -C release kubectl-nginx_supportpkg
-
-        GOOS=darwin GOARCH=arm64 go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
-                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION" -o release/kubectl-nginx_supportpkg
-        tar czvf release/kubectl-nginx-supportpkg_${VERSION}_darwin_arm64.tar.gz -C release kubectl-nginx_supportpkg
+        for OS in $OSES; do
+        for ARCH in $ARCHS; do
+        echo "OS: ${OS} and ARCH: ${ARCH}"
+        GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
+                                                   -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION"\
+                                                   -o release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}/kubectl-nginx_supportpkg
+        cp LICENSE release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}/
+        tar czvf release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}.tar.gz -C release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}/ .
+        done; done
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
