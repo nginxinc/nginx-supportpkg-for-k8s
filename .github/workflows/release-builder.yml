@@ -27,7 +27,7 @@ jobs:
       run: |
         BUILD=$(git log --format='%H' -n 1)
         VERSION=$RELEASE_VERSION
-        OSES="linux darwin"
+        OSES="linux darwin windows"
         ARCHS="amd64 arm64"
         IFS=" "
 
