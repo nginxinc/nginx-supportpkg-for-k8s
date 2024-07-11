@@ -46,6 +46,7 @@ func Execute() {
 			}
 
 			collector.Logger.Printf("Starting kubectl-nginx-suportpkg - version: %s - build: %s", version.Version, version.Build)
+			collector.Logger.Printf("Input args are %v", os.Args)
 
 			switch product {
 			case "nic":
