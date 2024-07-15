@@ -162,7 +162,7 @@ func (c *DataCollector) WrapUp(product string) (string, error) {
 		if err != nil {
 			return err
 		}
-		header.Name = tarballRootDirName + "/" + relativePath
+		header.Name = filepath.ToSlash(filepath.Join(tarballRootDirName, relativePath))
 
 		if err = tw.WriteHeader(header); err != nil {
 			return err
