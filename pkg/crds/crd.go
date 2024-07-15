@@ -81,11 +81,6 @@ func GetCRDList() []Crd {
 			Group:    "k8s.nginx.org",
 			Version:  "v1",
 		},
-		{
-			Resource: "cosarara",
-			Group:    "k8s.nginx.org",
-			Version:  "v1",
-		},
 	}
 	return crdList
 }
