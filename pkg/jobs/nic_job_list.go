@@ -435,32 +435,6 @@ func NICJobList() []Job {
 			},
 		},
 		{
-			Name:    "exec-nginx-ingress-version",
-			Timeout: time.Second * 10,
-			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
-				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
-				command := []string{"./nginx-ingress", "--version"}
-				for _, namespace := range dc.Namespaces {
-					pods, err := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
-					if err != nil {
-						dc.Logger.Printf("\tCould not retrieve pod list for namespace %s: %v\n", namespace, err)
-					} else {
-						for _, pod := range pods.Items {
-							if strings.Contains(pod.Name, "ingress") {
-								res, err := dc.PodExecutor(namespace, pod.Name, command, ctx)
-								if err != nil {
-									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
-								} else {
-									jobResult.Files[path.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-ingress-version.txt")] = res
-								}
-							}
-						}
-					}
-				}
-				ch <- jobResult
-			},
-		},
-		{
 			Name:    "crd-objects",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
