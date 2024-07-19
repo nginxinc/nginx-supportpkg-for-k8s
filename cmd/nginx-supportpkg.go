@@ -45,7 +45,7 @@ func Execute() {
 				os.Exit(1)
 			}
 
-			collector.Logger.Printf("Starting kubectl-nginx-suportpkg - version: %s - build: %s", version.Version, version.Build)
+			collector.Logger.Printf("Starting kubectl-nginx-supportpkg - version: %s - build: %s", version.Version, version.Build)
 			collector.Logger.Printf("Input args are %v", os.Args)
 
 			switch product {
@@ -92,7 +92,17 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	rootCmd.SetUsageTemplate("Usage: \n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] nic...\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] nic...\n")
+	versionStr := "nginx-supportpkg - version: " + version.Version + " - build: " + version.Build + "\n"
+	rootCmd.SetVersionTemplate(versionStr)
+	rootCmd.Version = versionStr
+
+	rootCmd.SetUsageTemplate(
+		versionStr +
+			"Usage:" +
+			"\n nginx-supportpkg -h|--help" +
+			"\n nginx-supportpkg -v|--version" +
+			"\n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] nic" +
+			"\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] nic \n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
