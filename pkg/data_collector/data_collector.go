@@ -90,14 +90,26 @@ func NewDataCollector(namespaces ...string) (*DataCollector, error) {
 
 	//Initialize clients
 	dc.K8sRestConfig = config
-	dc.K8sCoreClientSet, _ = kubernetes.NewForConfig(config)
-	dc.K8sCrdClientSet, _ = crdClient.NewForConfig(config)
-	dc.K8sMetricsClientSet, _ = metricsClient.NewForConfig(config)
+	dc.K8sCoreClientSet, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create K8sCoreClientSet: %s", err)
+	}
+	dc.K8sCrdClientSet, err = crdClient.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create K8sCrdClientSet: %s", err)
+	}
+	dc.K8sMetricsClientSet, err = metricsClient.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create K8sMetricsClientSet: %s", err)
+	}
 	for _, namespace := range dc.Namespaces {
-		dc.K8sHelmClientSet[namespace], _ = helmClient.NewClientFromRestConf(&helmClient.RestConfClientOptions{
+		dc.K8sHelmClientSet[namespace], err = helmClient.NewClientFromRestConf(&helmClient.RestConfClientOptions{
 			Options:    &helmClient.Options{Namespace: namespace},
 			RestConfig: config,
 		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create K8sHelmClientSet: %s", err)
+		}
 	}
 
 	return &dc, nil
