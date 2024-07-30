@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/data_collector"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -60,14 +60,14 @@ func (j Job) Collect(dc *data_collector.DataCollector) error {
 		}
 
 		for fileName, fileValue := range jobResults.Files {
-			err := os.MkdirAll(path.Dir(fileName), os.ModePerm)
+			err := os.MkdirAll(filepath.Dir(fileName), os.ModePerm)
 			if err != nil {
-				return err
+				return fmt.Errorf("MkdirAll failed: %v", err)
 			}
 			file, _ := os.Create(fileName)
 			_, err = file.Write(fileValue)
 			if err != nil {
-				return err
+				return fmt.Errorf("Write failed: %v", err)
 			}
 			_ = file.Close()
 			dc.Logger.Printf("\tJob %s wrote %d bytes to %s\n", j.Name, len(fileValue), fileName)

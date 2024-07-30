@@ -28,7 +28,7 @@ import (
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -46,7 +46,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve pod list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "pods.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "pods.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -64,7 +64,7 @@ func NICJobList() []Job {
 					}
 					for _, pod := range pods.Items {
 						for _, container := range pod.Spec.Containers {
-							logFileName := path.Join(dc.BaseDir, "logs", namespace, fmt.Sprintf("%s__%s.txt", pod.Name, container.Name))
+							logFileName := filepath.Join(dc.BaseDir, "logs", namespace, fmt.Sprintf("%s__%s.txt", pod.Name, container.Name))
 							bufferedLogs := dc.K8sCoreClientSet.CoreV1().Pods(namespace).GetLogs(pod.Name, &corev1.PodLogOptions{Container: container.Name})
 							podLogs, err := bufferedLogs.Stream(context.TODO())
 							if err != nil {
@@ -96,7 +96,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve events list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "events.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "events.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -113,7 +113,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve configmap list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "configmaps.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "configmaps.json")] = jsonResult
 					}
 				}
 
@@ -131,7 +131,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve services list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "services.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "services.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -148,7 +148,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve deployments list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "deployments.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "deployments.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -165,7 +165,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve statefulsets list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "statefulsets.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "statefulsets.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -182,7 +182,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve daemonsets list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "daemonsets.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "daemonsets.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -199,7 +199,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve replicasets list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "replicasets.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "replicasets.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -216,7 +216,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve leases list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "resources", namespace, "leases.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "resources", namespace, "leases.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -233,7 +233,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve roles list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "roles.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "rbac", namespace, "roles.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -250,7 +250,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve serviceaccounts list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "serviceaccounts.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "rbac", namespace, "serviceaccounts.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -267,7 +267,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve role bindings list for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonResult, _ := json.MarshalIndent(result, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", namespace, "rolebindings.json")] = jsonResult
+						jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "rbac", namespace, "rolebindings.json")] = jsonResult
 					}
 				}
 				ch <- jobResult
@@ -283,7 +283,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve server version: %v\n", err)
 				} else {
 					jsonResult, _ := json.MarshalIndent(result, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "k8s", "version.json")] = jsonResult
+					jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "version.json")] = jsonResult
 				}
 				ch <- jobResult
 			},
@@ -298,7 +298,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve crd data: %v\n", err)
 				} else {
 					jsonResult, _ := json.MarshalIndent(result, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "k8s", "crd.json")] = jsonResult
+					jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "crd.json")] = jsonResult
 				}
 				ch <- jobResult
 			},
@@ -313,7 +313,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve clusterroles data: %v\n", err)
 				} else {
 					jsonResult, _ := json.MarshalIndent(result, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", "clusterroles.json")] = jsonResult
+					jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "rbac", "clusterroles.json")] = jsonResult
 				}
 				ch <- jobResult
 			},
@@ -328,7 +328,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve clusterroles binding data: %v\n", err)
 				} else {
 					jsonResult, _ := json.MarshalIndent(result, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "k8s", "rbac", "clusterrolesbindings.json")] = jsonResult
+					jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "rbac", "clusterrolesbindings.json")] = jsonResult
 				}
 				ch <- jobResult
 			},
@@ -343,7 +343,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve nodes information: %v\n", err)
 				} else {
 					jsonResult, _ := json.MarshalIndent(result, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "k8s", "nodes.json")] = jsonResult
+					jobResult.Files[filepath.Join(dc.BaseDir, "k8s", "nodes.json")] = jsonResult
 				}
 				ch <- jobResult
 			},
@@ -358,7 +358,7 @@ func NICJobList() []Job {
 					dc.Logger.Printf("\tCould not retrieve nodes metrics: %v\n", err)
 				} else {
 					jsonNodeMetrics, _ := json.MarshalIndent(nodeMetrics, "", "  ")
-					jobResult.Files[path.Join(dc.BaseDir, "metrics", "node-resource-list.json")] = jsonNodeMetrics
+					jobResult.Files[filepath.Join(dc.BaseDir, "metrics", "node-resource-list.json")] = jsonNodeMetrics
 				}
 				for _, namespace := range dc.Namespaces {
 					podMetrics, _ := dc.K8sMetricsClientSet.MetricsV1beta1().PodMetricses(namespace).List(ctx, metav1.ListOptions{})
@@ -366,7 +366,7 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve pods metrics for namespace %s: %v\n", namespace, err)
 					} else {
 						jsonPodMetrics, _ := json.MarshalIndent(podMetrics, "", "  ")
-						jobResult.Files[path.Join(dc.BaseDir, "metrics", namespace, "pod-resource-list.json")] = jsonPodMetrics
+						jobResult.Files[filepath.Join(dc.BaseDir, "metrics", namespace, "pod-resource-list.json")] = jsonPodMetrics
 					}
 				}
 				ch <- jobResult
@@ -382,7 +382,7 @@ func NICJobList() []Job {
 				if err != nil {
 					dc.Logger.Printf("\tCould not retrieve helm information: %v\n", err)
 				} else {
-					jobResult.Files[path.Join(dc.BaseDir, "helm", "settings.json")] = jsonSettings
+					jobResult.Files[filepath.Join(dc.BaseDir, "helm", "settings.json")] = jsonSettings
 				}
 				ch <- jobResult
 			},
@@ -399,8 +399,8 @@ func NICJobList() []Job {
 					} else {
 						for _, release := range releases {
 							jsonRelease, _ := json.MarshalIndent(release, "", "  ")
-							jobResult.Files[path.Join(dc.BaseDir, "helm", namespace, release.Name+"_release.json")] = jsonRelease
-							jobResult.Files[path.Join(dc.BaseDir, "helm", namespace, release.Name+"_manifest.txt")] = []byte(release.Manifest)
+							jobResult.Files[filepath.Join(dc.BaseDir, "helm", namespace, release.Name+"_release.json")] = jsonRelease
+							jobResult.Files[filepath.Join(dc.BaseDir, "helm", namespace, release.Name+"_manifest.txt")] = []byte(release.Manifest)
 						}
 					}
 				}
@@ -425,7 +425,7 @@ func NICJobList() []Job {
 								if err != nil {
 									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
 								} else {
-									jobResult.Files[path.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-t.txt")] = res
+									jobResult.Files[filepath.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-t.txt")] = res
 								}
 							}
 						}
@@ -451,7 +451,7 @@ func NICJobList() []Job {
 								if err != nil {
 									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
 								} else {
-									jobResult.Files[path.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-ingress-version.txt")] = res
+									jobResult.Files[filepath.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-ingress-version.txt")] = res
 								}
 							}
 						}
@@ -473,7 +473,7 @@ func NICJobList() []Job {
 						} else {
 							var jsonResult bytes.Buffer
 							_ = json.Indent(&jsonResult, result, "", "  ")
-							jobResult.Files[path.Join(dc.BaseDir, "crds", namespace, crd.Resource+".json")] = jsonResult.Bytes()
+							jobResult.Files[filepath.Join(dc.BaseDir, "crds", namespace, crd.Resource+".json")] = jsonResult.Bytes()
 						}
 					}
 				}
