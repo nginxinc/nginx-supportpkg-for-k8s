@@ -27,7 +27,7 @@ jobs:
         for OS in $OSES; do
         for ARCH in $ARCHS; do
         echo "OS: ${OS} and ARCH: ${ARCH}"
-        GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
+        CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH} go build -ldflags "-w -s -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Build=$BUILD\
                                                    -X github.com/nginxinc/nginx-k8s-supportpkg/pkg/version.Version=$VERSION"\
                                                    -o release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}/kubectl-nginx_supportpkg
         cp LICENSE release/kubectl-nginx_supportpkg_${VERSION}_${OS}_${ARCH}/
