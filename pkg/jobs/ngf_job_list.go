@@ -30,27 +30,27 @@ import (
 	"time"
 )
 
-func NICJobList() []Job {
+func NGFJobList() []Job {
 	jobList := []Job{
 		{
-			Name:    "exec-nginx-ingress-version",
+			Name:    "exec-nginx-gateway-version",
 			Timeout: time.Second * 10,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
-				command := []string{"./nginx-ingress", "--version"}
+				command := []string{"/usr/bin/gateway", "--help"}
 				for _, namespace := range dc.Namespaces {
 					pods, err := dc.K8sCoreClientSet.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
 					if err != nil {
 						dc.Logger.Printf("\tCould not retrieve pod list for namespace %s: %v\n", namespace, err)
 					} else {
 						for _, pod := range pods.Items {
-							if strings.Contains(pod.Name, "ingress") {
-								res, err := dc.PodExecutor(namespace, pod.Name, "nginx-ingress", command, ctx)
+							if strings.Contains(pod.Name, "nginx-gateway") {
+								res, err := dc.PodExecutor(namespace, pod.Name, "nginx-gateway", command, ctx)
 								if err != nil {
 									jobResult.Error = err
 									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
 								} else {
-									jobResult.Files[filepath.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-ingress-version.txt")] = res
+									jobResult.Files[filepath.Join(dc.BaseDir, "exec", namespace, pod.Name+"__nginx-gateway-version.txt")] = res
 								}
 							}
 						}
@@ -71,8 +71,8 @@ func NICJobList() []Job {
 						dc.Logger.Printf("\tCould not retrieve pod list for namespace %s: %v\n", namespace, err)
 					} else {
 						for _, pod := range pods.Items {
-							if strings.Contains(pod.Name, "ingress") {
-								res, err := dc.PodExecutor(namespace, pod.Name, "nginx-ingress", command, ctx)
+							if strings.Contains(pod.Name, "nginx-gateway") {
+								res, err := dc.PodExecutor(namespace, pod.Name, "nginx", command, ctx)
 								if err != nil {
 									jobResult.Error = err
 									dc.Logger.Printf("\tCommand execution %s failed for pod %s in namespace %s: %v\n", command, pod.Name, namespace, err)
@@ -92,7 +92,7 @@ func NICJobList() []Job {
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
 				for _, namespace := range dc.Namespaces {
-					for _, crd := range crds.GetNICCRDList() {
+					for _, crd := range crds.GetNGFCRDList() {
 						result, err := dc.QueryCRD(crd, namespace, ctx)
 						if err != nil {
 							dc.Logger.Printf("\tCRD %s.%s/%s could not be collected in namespace %s: %v\n", crd.Resource, crd.Group, crd.Version, namespace, err)
