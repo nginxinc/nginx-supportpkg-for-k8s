@@ -241,7 +241,6 @@ func (c *DataCollector) QueryCRD(crd crds.Crd, namespace string, ctx context.Con
 	c.K8sRestConfig.NegotiatedSerializer = negotiatedSerializer
 
 	client, err := rest.RESTClientFor(c.K8sRestConfig)
-	c.Logger.Printf("MRAJAGOPAL: %v", err)
 	if err != nil {
 		return nil, err
 	}
