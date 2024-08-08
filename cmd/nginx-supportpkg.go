@@ -25,6 +25,7 @@ import (
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
+	"slices"
 )
 
 func Execute() {
@@ -50,7 +51,9 @@ func Execute() {
 
 			switch product {
 			case "nic":
-				jobList = jobs.NICJobList()
+				jobList = slices.Concat(jobs.CommonJobList(), jobs.NICJobList())
+			case "ngf":
+				jobList = slices.Concat(jobs.CommonJobList(), jobs.NGFJobList())
 			default:
 				fmt.Printf("Error: product must be in the following list: [nic]\n")
 				os.Exit(1)
