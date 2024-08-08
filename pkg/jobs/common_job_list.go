@@ -71,11 +71,16 @@ func CommonJobList() []Job {
 								buf := new(bytes.Buffer)
 								_, err := io.Copy(buf, podLogs)
 								if err != nil {
+									jobResult.Error = err
 									dc.Logger.Printf("\tCould not copy log buffer for pod %s/%s: %v\n", namespace, pod.Name, err)
 								} else {
 									jobResult.Files[logFileName] = buf.Bytes()
 								}
-								podLogs.Close()
+								err = podLogs.Close()
+								if err != nil {
+									jobResult.Error = err
+									dc.Logger.Printf("\tCould not close logs for pod %s/%s: %v\n", namespace, pod.Name, err)
+								}
 							}
 						}
 					}
