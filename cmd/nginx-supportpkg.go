@@ -55,7 +55,7 @@ func Execute() {
 			case "ngf":
 				jobList = slices.Concat(jobs.CommonJobList(), jobs.NGFJobList())
 			default:
-				fmt.Printf("Error: product must be in the following list: [nic]\n")
+				fmt.Printf("Error: product must be in the following list: [nic, ngf]\n")
 				os.Exit(1)
 			}
 
@@ -104,8 +104,8 @@ func Execute() {
 			"Usage:" +
 			"\n nginx-supportpkg -h|--help" +
 			"\n nginx-supportpkg -v|--version" +
-			"\n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] nic" +
-			"\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] nic \n")
+			"\n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] [nic,ngf]" +
+			"\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] [nic,ngf] \n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
