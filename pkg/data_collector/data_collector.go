@@ -199,18 +199,19 @@ func (c *DataCollector) WrapUp(product string) (string, error) {
 	return tarballName, nil
 }
 
-func (c *DataCollector) PodExecutor(namespace string, pod string, command []string, ctx context.Context) ([]byte, error) {
+func (c *DataCollector) PodExecutor(namespace string, pod string, container string, command []string, ctx context.Context) ([]byte, error) {
 	req := c.K8sCoreClientSet.CoreV1().RESTClient().Post().
 		Namespace(namespace).
 		Resource("pods").
 		Name(pod).
 		SubResource("exec").
 		VersionedParams(&corev1.PodExecOptions{
-			Command: command,
-			Stdin:   false,
-			Stdout:  true,
-			Stderr:  true,
-			TTY:     true,
+			Command:   command,
+			Container: container,
+			Stdin:     false,
+			Stdout:    true,
+			Stderr:    true,
+			TTY:       true,
 		}, scheme.ParameterCodec)
 
 	exec, err := remotecommand.NewSPDYExecutor(c.K8sRestConfig, "POST", req.URL())
@@ -240,7 +241,6 @@ func (c *DataCollector) QueryCRD(crd crds.Crd, namespace string, ctx context.Con
 	c.K8sRestConfig.NegotiatedSerializer = negotiatedSerializer
 
 	client, err := rest.RESTClientFor(c.K8sRestConfig)
-
 	if err != nil {
 		return nil, err
 	}

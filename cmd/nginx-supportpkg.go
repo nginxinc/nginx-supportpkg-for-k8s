@@ -25,6 +25,7 @@ import (
 	"github.com/nginxinc/nginx-k8s-supportpkg/pkg/version"
 	"github.com/spf13/cobra"
 	"os"
+	"slices"
 )
 
 func Execute() {
@@ -50,9 +51,11 @@ func Execute() {
 
 			switch product {
 			case "nic":
-				jobList = jobs.NICJobList()
+				jobList = slices.Concat(jobs.CommonJobList(), jobs.NICJobList())
+			case "ngf":
+				jobList = slices.Concat(jobs.CommonJobList(), jobs.NGFJobList())
 			default:
-				fmt.Printf("Error: product must be in the following list: [nic]\n")
+				fmt.Printf("Error: product must be in the following list: [nic, ngf]\n")
 				os.Exit(1)
 			}
 
@@ -101,8 +104,8 @@ func Execute() {
 			"Usage:" +
 			"\n nginx-supportpkg -h|--help" +
 			"\n nginx-supportpkg -v|--version" +
-			"\n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] nic" +
-			"\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] nic \n")
+			"\n nginx-supportpkg [-n|--namespace] ns1 [-n|--namespace] ns2 [-p|--product] [nic,ngf]" +
+			"\n nginx-supportpkg [-n|--namespace] ns1,ns2 [-p|--product] [nic,ngf] \n")
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
