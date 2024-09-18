@@ -60,11 +60,13 @@ func Execute() {
 			}
 
 			if collector.AllNamespacesExist() {
+				failedJobs := 0
 				for _, job := range jobList {
 					fmt.Printf("Running job %s...", job.Name)
 					err = job.Collect(collector)
 					if err != nil {
 						fmt.Printf(" Error: %s\n", err)
+						failedJobs++
 					} else {
 						fmt.Print(" OK\n")
 					}
@@ -75,7 +77,13 @@ func Execute() {
 					fmt.Println(fmt.Errorf("error when wrapping up: %s", err))
 					os.Exit(1)
 				} else {
-					fmt.Printf("Supportpkg successfully generated: %s\n", tarFile)
+					if failedJobs == 0 {
+						fmt.Printf("Supportpkg successfully generated: %s\n", tarFile)
+					} else {
+						fmt.Printf("WARNING: %d failed job(s)\n", failedJobs)
+						fmt.Printf("Supportpkg generated with warnings: %s\n", tarFile)
+					}
+
 				}
 			} else {
 				fmt.Println(" Error: Some namespaces do not exist")
