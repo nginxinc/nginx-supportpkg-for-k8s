@@ -52,7 +52,7 @@ func CommonJobList() []Job {
 		},
 		{
 			Name:    "collect-pods-logs",
-			Timeout: time.Second * 30,
+			Timeout: time.Second * 120,
 			Execute: func(dc *data_collector.DataCollector, ctx context.Context, ch chan JobResult) {
 				jobResult := JobResult{Files: make(map[string][]byte), Error: nil}
 				for _, namespace := range dc.Namespaces {
