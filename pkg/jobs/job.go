@@ -50,7 +50,7 @@ func (j Job) Collect(dc *data_collector.DataCollector) error {
 
 	select {
 	case <-ctx.Done():
-		dc.Logger.Printf("\tJob %s has timed out: %s\n", j.Name, ctx.Err())
+		dc.Logger.Printf("\tJob %s has timed out: %s\n---\n", j.Name, ctx.Err())
 		return errors.New(fmt.Sprintf("Context cancelled: %v", ctx.Err()))
 
 	case jobResults := <-ch:
