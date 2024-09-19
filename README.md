@@ -4,7 +4,7 @@ A kubectl plugin designed to collect diagnostics information on any NGINX produc
 
 ## Supported products
 
-Currently, [NIC](https://github.com/nginxinc/kubernetes-ingress) is the only supported product.
+Currently, [NIC](https://github.com/nginxinc/kubernetes-ingress), [NGF](https://github.com/nginxinc/nginx-gateway-fabric) and [NGINX (OSS/NPLUS) in containers](https://github.com/nginx/nginx) are the supported products.
 
 ## Features
 
