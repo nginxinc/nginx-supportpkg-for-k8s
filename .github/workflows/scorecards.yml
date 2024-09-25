@@ -2,7 +2,7 @@ name: OpenSSF Scorecards
 on:
   branch_protection_rule: # yamllint disable-line rule:empty-values
   schedule:
-    - cron: "28 14 * * 2" # Run every Tuesday at 14:28 UTC
+    - cron: "28 14 * * *" # Run daily at 14:28 UTC
   push:
     branches:
       - main
