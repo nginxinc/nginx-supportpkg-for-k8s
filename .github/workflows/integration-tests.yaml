@@ -1,0 +1,33 @@
+name: Integration Tests
+
+on: [push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Set up k3d
+        run: |
+          curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+          k3d cluster create test-cluster
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          kubectl version
+          kubectl get nodes
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: project
+
+      - name: Build nginx-supportpkg binary
+        run: |
+          cd project
+          go build -o nginx-supportpkg
+          chmod +x nginx-supportpkg
+          cp nginx-supportpkg /usr/local/bin/
+          kubectl nginx-supportpkg
+
+      - name: Run tests
+        run: go test ./tests -v
