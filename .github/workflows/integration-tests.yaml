@@ -30,4 +30,6 @@ jobs:
           kubectl nginx-supportpkg -v
 
       - name: Run tests
-        run: go test ./tests -v
+        run: |
+          cd project
+          go test ./tests -v
