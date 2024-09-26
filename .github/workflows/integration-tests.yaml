@@ -24,10 +24,10 @@ jobs:
       - name: Build nginx-supportpkg binary
         run: |
           cd project
-          go build -o nginx-supportpkg
-          chmod +x nginx-supportpkg
-          cp nginx-supportpkg /usr/local/bin/
-          kubectl nginx-supportpkg
+          go build -o kubectl-nginx_supportpkg
+          chmod +x kubectl-nginx_supportpkg
+          cp kubectl-nginx_supportpkg /usr/local/bin/
+          kubectl nginx-supportpkg -v
 
       - name: Run tests
         run: go test ./tests -v
