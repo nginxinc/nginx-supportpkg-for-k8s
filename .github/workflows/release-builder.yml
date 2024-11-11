@@ -68,4 +68,4 @@ jobs:
           asset_paths: '["./release/*.gz", "./release/*.txt", "./release/*.sig", "./release/*.pem"]'
 
       - name: Update new version in krew-index
-        uses: rajatjindal/krew-release-bot@df3eb197549e3568be8b4767eec31c5e8e8e6ad8 # v0.0.46
+        uses: rajatjindal/krew-release-bot@3d9faef30a82761d610544f62afddca00993eef9 # v0.0.47
