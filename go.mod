@@ -1,7 +1,6 @@
 module github.com/nginxinc/nginx-k8s-supportpkg
 
-go 1.22.4
-toolchain go1.23.4
+go 1.23.4
 
 require (
 	github.com/mittwald/go-helm-client v0.12.15
