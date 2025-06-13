@@ -1,5 +1,5 @@
 FROM alpine:latest
-COPY --chmod=744 --from=project api_stats.sh /root/api_stats.sh
+COPY --chmod=744 api_stats.sh /root/api_stats.sh
 
 RUN set -ex \
   && apk --update add --no-cache \
