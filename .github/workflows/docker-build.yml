@@ -11,6 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+        # Step 2: Debug: Verify api_stats.sh and repository content
+      - name: List repository files
+        run: ls -R .; pwd
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
