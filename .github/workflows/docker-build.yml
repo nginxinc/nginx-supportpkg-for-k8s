@@ -1,4 +1,8 @@
 name: Build and Push Docker Image for nginx-utils container
+permissions:
+  contents: read
+  packages: write
+  actions: write
 on:
   push:
     branches:
