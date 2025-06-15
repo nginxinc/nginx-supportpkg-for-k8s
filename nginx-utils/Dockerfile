@@ -1,4 +1,13 @@
 FROM alpine:latest
+
+LABEL org.opencontainers.image.description="Container image including various troubleshooting tools such as curl, tcpdump, iperf, netcat to name a few not available in the target container"
+LABEL org.opencontainers.image.vendor="NGINX"
+LABEL org.opencontainers.image.authors="NGINX <plus-support@nginx.com>"
+LABEL org.opencontainers.image.url="https://github.com/nginx/nginx-supportpkg-for-k8s/pkgs/container/nginx-utils"
+LABEL org.opencontainers.image.documentation="https://github.com/nginx/nginx-supportpkg-for-k8s/pkgs/container/nginx-utils"
+LABEL org.opencontainers.image.source="https://github.com/nginx/nginx-supportpkg-for-k8s/tree/main/nginx-utils"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+
 COPY --chmod=744 nginx-utils/api_stats.sh /root/api_stats.sh
 
 RUN set -ex \
