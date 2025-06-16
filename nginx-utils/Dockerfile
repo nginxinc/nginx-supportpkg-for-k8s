@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.source="https://github.com/nginx/nginx-supportpkg
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 
 COPY --chmod=744 nginx-utils/api_stats.sh /root/api_stats.sh
+COPY --chmod=744 nginx-utils/memory_stats.sh /root/memory_stats.sh
 
 RUN set -ex \
   && apk --update add --no-cache \
