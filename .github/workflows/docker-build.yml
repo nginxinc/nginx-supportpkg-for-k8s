@@ -4,10 +4,13 @@ permissions:
   packages: write
   actions: write
 on:
+  workflow_dispatch:
   push:
     branches:
-      - mrajagopal-utils-pod
-
+      - '*'
+    paths:
+      - 'nginx-utils/**'
+      - '.github/workflows/docker-build.yml'
 jobs:
   build:
     runs-on: ubuntu-latest
