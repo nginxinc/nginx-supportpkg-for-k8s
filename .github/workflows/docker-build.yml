@@ -10,9 +10,13 @@ on:
 env:
   RELEASE_VERSION: ${{ github.event.release.tag_name }}
 jobs:
-  build:
+  run-on-release:
+    if: endsWith(github.event.release.tag_name, '-docker')
     runs-on: ubuntu-latest
     steps:
+      - name: Starting Release Build
+        run: echo "Starting Release Build for ${{ github.event.release.tag_name }}"
+        
       - name: Checkout code
         uses: actions/checkout@v4.2.2
 
