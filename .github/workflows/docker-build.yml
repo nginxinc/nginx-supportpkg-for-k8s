@@ -34,8 +34,11 @@ jobs:
           context: .
           file: nginx-utils/Dockerfile
           push: true
-          tags: ghcr.io/nginx/nginx-utils:latest
           platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/nginx/nginx-utils:${{ env.RELEASE_VERSION }}
+            ghcr.io/nginx/nginx-utils:latest
+
 
   # Step 5: Install Trivy for Vulnerability Scanning
       - name: Install Trivy and scan image for vulnerabilities
