@@ -4,13 +4,11 @@ permissions:
   packages: write
   actions: write
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - '*'
-    paths:
-      - 'nginx-utils/**'
-      - '.github/workflows/docker-build.yml'
+  release:
+    types: [created]
+
+env:
+  RELEASE_VERSION: ${{ github.event.release.tag_name }}
 jobs:
   build:
     runs-on: ubuntu-latest

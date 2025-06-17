@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -e
 echo ""
 echo " **** Output of memory.stat ****"
 cat /sys/fs/cgroup/memory.stat
