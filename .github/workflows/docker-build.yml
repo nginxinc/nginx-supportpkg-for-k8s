@@ -20,7 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
 
-        # Step 2: Debug: Verify api_stats.sh and repository content
       - name: List repository files
         run: ls -R .; pwd
       - name: Set up Docker Buildx
@@ -43,8 +42,6 @@ jobs:
             ghcr.io/nginx/nginx-utils:${{ env.RELEASE_VERSION }}
             ghcr.io/nginx/nginx-utils:latest
 
-
-  # Step 5: Install Trivy for Vulnerability Scanning
       - name: Install Trivy and scan image for vulnerabilities
         uses: aquasecurity/trivy-action@0.31.0
 
@@ -58,3 +55,21 @@ jobs:
         with:
           name: vuln-report
           path: vuln-report.json
+
+      - name: Update Release Notes with Docker Image Info
+        uses: softprops/action-gh-release@v2.3.2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          body: |
+            ## Docker Image
+            The Docker image for this release can be pulled using:
+
+            ```
+            docker pull ghcr.io/${{ github.repository_owner }}/nginx-utils:${{ github.event.release.tag_name }}
+            ```
+
+            Or use the `latest` tag:
+
+            ```
+            docker pull ghcr.io/${{ github.repository_owner }}/nginx-utils:latest
+            ```
