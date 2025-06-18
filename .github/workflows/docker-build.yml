@@ -1,4 +1,4 @@
-name: Build and Push Docker Image for nginx-utils container
+name: Build and Push Docker Image For nginx-utils Container
 permissions:
   contents: read
   packages: write
@@ -14,8 +14,11 @@ jobs:
     if: endsWith(github.event.release.tag_name, '-docker')
     runs-on: ubuntu-latest
     steps:
+      - name: Set Release Version
+        run: echo "RELEASE_VERSION=${RELEASE_VERSION%-docker}" >> $GITHUB_ENV     
+         
       - name: Starting Release Build
-        run: echo "Starting Release Build for ${{ github.event.release.tag_name }}"
+        run: echo "Starting Release Build for ${RELEASE_VERSION}"
         
       - name: Checkout code
         uses: actions/checkout@v4.2.2
